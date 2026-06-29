@@ -3,11 +3,13 @@ import { createRoot } from "react-dom/client";
 import { App } from "@/App";
 import { installImpersonationFromHash } from "@/auth/impersonation-handoff";
 import { loadRuntimeConfig } from "@/env";
+import { initI18n } from "@/i18n";
 import "@/styles/globals.css";
 
 // Runtime config must resolve before React mounts so env.apiBase reads
 // inside components see the right value on first paint.
 await loadRuntimeConfig();
+await initI18n();
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {

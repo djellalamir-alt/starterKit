@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 import {
   ChevronDown,
   CircleCheck,
@@ -29,7 +30,7 @@ import {
   DialogFooter,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ApiRequestError } from "@/lib/api-client";
+import { localizeApiError } from "@shared/i18n";
 import { cn } from "@/lib/cn";
 
 // ─── Schema (unchanged contract) ────────────────────────────────────────────
@@ -206,6 +207,7 @@ export function CreateTenantDialog({
 }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation(["errors"]);
 
   // UI-only state, reset on close.
   const [idMode, setIdMode] = useState<"auto" | "manual">("auto");
@@ -307,11 +309,7 @@ export function CreateTenantDialog({
       navigate(`/tenants/${result.id}`);
     },
     onError: (err) => {
-      const detail =
-        err instanceof ApiRequestError
-          ? err.problem?.detail ?? err.problem?.title ?? err.message
-          : (err as Error).message;
-      toast.error("Create failed", { description: detail });
+      toast.error("Create failed", { description: localizeApiError(err, t) });
     },
   });
 
@@ -530,13 +528,13 @@ export function CreateTenantDialog({
                   type="button"
                   onClick={() => setAdvancedOpen((o) => !o)}
                   aria-expanded={advancedOpen}
-                  className="flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-left outline-none
+                  className="flex w-full items-center justify-between gap-2 rounded-lg px-3 py-2.5 text-start outline-none
                     transition-colors hover:bg-[var(--color-accent)] cursor-pointer
                     focus-visible:ring-2 focus-visible:ring-[oklch(from_var(--color-ring)_l_c_h_/_0.5)]"
                 >
                   <span className="text-[12.5px] font-medium text-[var(--color-foreground)]">
                     Advanced
-                    <span className="ml-1.5 font-normal text-[var(--color-muted-foreground)]">
+                    <span className="ms-1.5 font-normal text-[var(--color-muted-foreground)]">
                       issuer, dedicated database
                     </span>
                   </span>

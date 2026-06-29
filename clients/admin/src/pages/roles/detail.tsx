@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ArrowLeft, Lock, Shield, ShieldCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import {
   deleteRole,
   getRoleWithPermissions,
@@ -27,7 +28,7 @@ import {
   PERMISSION_CATALOG,
   type PermissionGroup,
 } from "@/lib/permissions";
-import { ApiRequestError } from "@/lib/api-client";
+import { localizeApiError } from "@shared/i18n";
 import { cn } from "@/lib/cn";
 
 const SYSTEM_ROLE_NAMES = new Set(["Admin", "Basic"]);
@@ -39,6 +40,7 @@ const profileSchema = z.object({
 type ProfileValues = z.infer<typeof profileSchema>;
 
 export function RoleDetailPage() {
+  const { t } = useTranslation(["errors"]);
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -79,13 +81,7 @@ export function RoleDetailPage() {
       </EntityPageHeader>
 
       {query.isError && (
-        <ErrorBand
-          message={
-            query.error instanceof ApiRequestError
-              ? query.error.problem?.detail ?? query.error.message
-              : "Failed to load role."
-          }
-        />
+        <ErrorBand message={localizeApiError(query.error, t)} />
       )}
 
       {query.isLoading && <LoadingRow label="Loading role" />}
@@ -137,6 +133,7 @@ export function RoleDetailPage() {
 // ─── Profile section ────────────────────────────────────────────────────
 
 function ProfileSection({ role, disabled }: { role: RoleDto; disabled: boolean }) {
+  const { t } = useTranslation(["errors"]);
   const queryClient = useQueryClient();
   const {
     register,
@@ -169,11 +166,7 @@ function ProfileSection({ role, disabled }: { role: RoleDto; disabled: boolean }
       queryClient.invalidateQueries({ queryKey: ["roles", result.id] });
     },
     onError: (err) => {
-      const detail =
-        err instanceof ApiRequestError
-          ? err.problem?.detail ?? err.problem?.title ?? err.message
-          : (err as Error).message;
-      toast.error("Update failed", { description: detail });
+      toast.error("Update failed", { description: localizeApiError(err, t) });
     },
   });
 
@@ -235,6 +228,7 @@ function ProfileSection({ role, disabled }: { role: RoleDto; disabled: boolean }
 // ─── Permission editor ──────────────────────────────────────────────────
 
 function PermissionEditor({ role, disabled }: { role: RoleDto; disabled: boolean }) {
+  const { t } = useTranslation(["errors"]);
   const queryClient = useQueryClient();
   const initial = useMemo(() => new Set(role.permissions ?? []), [role.permissions]);
   const [selected, setSelected] = useState<Set<string>>(initial);
@@ -252,11 +246,7 @@ function PermissionEditor({ role, disabled }: { role: RoleDto; disabled: boolean
       queryClient.invalidateQueries({ queryKey: ["roles", role.id] });
     },
     onError: (err: unknown) => {
-      const detail =
-        err instanceof ApiRequestError
-          ? err.problem?.detail ?? err.problem?.title ?? err.message
-          : (err as Error).message;
-      toast.error("Update failed", { description: detail });
+      toast.error("Update failed", { description: localizeApiError(err, t) });
     },
   });
 
@@ -451,6 +441,7 @@ function PermissionEditor({ role, disabled }: { role: RoleDto; disabled: boolean
 // ─── Danger zone ────────────────────────────────────────────────────────
 
 function DangerZone({ role, onDeleted }: { role: RoleDto; onDeleted: () => void }) {
+  const { t } = useTranslation(["errors"]);
   const [confirm, setConfirm] = useState("");
 
   const mutation = useMutation({
@@ -460,11 +451,7 @@ function DangerZone({ role, onDeleted }: { role: RoleDto; onDeleted: () => void 
       onDeleted();
     },
     onError: (err: unknown) => {
-      const detail =
-        err instanceof ApiRequestError
-          ? err.problem?.detail ?? err.problem?.title ?? err.message
-          : (err as Error).message;
-      toast.error("Delete failed", { description: detail });
+      toast.error("Delete failed", { description: localizeApiError(err, t) });
     },
   });
 

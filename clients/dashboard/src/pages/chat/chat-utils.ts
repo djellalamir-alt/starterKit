@@ -1,4 +1,5 @@
 import { ChannelType, type ChannelDto, type MessageDto } from "@/api/chat";
+import { formatDate } from "@shared/i18n";
 
 /** Stable display name for a channel — falls back through type-appropriate paths. */
 export function channelTitle(channel: ChannelDto, selfUserId?: string): string {
@@ -41,9 +42,9 @@ export function dayRuleLabel(iso: string): string {
   if (days === 0) return "Today";
   if (days === 1) return "Yesterday";
   if (days < 7) {
-    return d.toLocaleDateString("en-US", { weekday: "long" });
+    return formatDate(d, { weekday: "long" });
   }
-  return d.toLocaleDateString("en-US", {
+  return formatDate(d, {
     weekday: "short",
     month: "short",
     day: "numeric",
@@ -53,7 +54,7 @@ export function dayRuleLabel(iso: string): string {
 /** "HH:MM" / "h:MM AM" — sender-time chip next to the author's name. */
 export function shortTime(iso: string): string {
   const d = new Date(iso);
-  return d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  return formatDate(d, { hour: "numeric", minute: "2-digit" });
 }
 
 /** "Today 10:42" / "Yesterday 4:18 PM" / "Mar 3 9:01 AM" — for search results

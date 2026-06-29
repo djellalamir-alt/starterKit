@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { Camera, Fingerprint, UserCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { localizeApiError } from "@shared/i18n";
 import { useAuth } from "@/auth/use-auth";
 import { getMyProfile, setProfileImage, updateMyProfile } from "@/api/identity";
-import { ApiRequestError } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,6 +15,7 @@ import { SettingsSection } from "@/pages/settings/settings-layout";
 const PROFILE_KEY = ["identity", "me"] as const;
 
 export function ProfileSettings() {
+  const { t } = useTranslation("common");
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -54,15 +56,11 @@ export function ProfileSettings() {
         phoneNumber: phone.trim() || null,
       }),
     onSuccess: () => {
-      toast.success("Profile saved");
+      toast.success(t("settings.profile.profileSaved"));
       queryClient.invalidateQueries({ queryKey: PROFILE_KEY });
     },
     onError: (err: unknown) => {
-      const message =
-        err instanceof ApiRequestError
-          ? err.problem?.detail ?? err.problem?.title ?? err.message
-          : "Failed to save profile";
-      toast.error("Save failed", { description: message });
+      toast.error(t("settings.profile.saveFailed"), { description: localizeApiError(err, t) });
     },
   });
 
@@ -88,15 +86,11 @@ export function ProfileSettings() {
   const imageMutation = useMutation({
     mutationFn: (url: string | null) => setProfileImage(url),
     onSuccess: () => {
-      toast.success("Profile image updated");
+      toast.success(t("settings.profile.imageUpdated"));
       queryClient.invalidateQueries({ queryKey: PROFILE_KEY });
     },
     onError: (e: unknown) => {
-      const message =
-        e instanceof ApiRequestError
-          ? (e.problem?.detail ?? e.problem?.title ?? e.message)
-          : "Failed to update profile image";
-      toast.error(message);
+      toast.error(localizeApiError(e, t));
     },
   });
 
@@ -108,15 +102,14 @@ export function ProfileSettings() {
           className="flex items-start gap-2 rounded-lg border border-[oklch(from_var(--color-destructive)_l_c_h_/_0.30)] bg-[oklch(from_var(--color-destructive)_l_c_h_/_0.06)] px-3 py-2 text-[13px] text-[var(--color-destructive)]"
         >
           <span>
-            Couldn't load your profile. Showing details from your session;
-            saved changes may not reflect the latest server state.
+            {t("settings.profile.loadWarning")}
           </span>
         </div>
       )}
       <SettingsSection
-        title="Photo"
+        title={t("settings.profile.photoTitle")}
         icon={Camera}
-        description="Shown in the topbar and on your activity. Square crops work best — JPG, PNG, or WebP."
+        description={t("settings.profile.avatarDescription")}
       >
         <ImageInput
           value={profile?.imageUrl ?? ""}
@@ -128,9 +121,9 @@ export function ProfileSettings() {
       </SettingsSection>
 
       <SettingsSection
-        title="Identity"
+        title={t("settings.profile.identityTitle")}
         icon={UserCircle2}
-        description="Your name and contact details, visible across the dashboard."
+        description={t("settings.profile.dashboardIdentityDescription")}
         footer={
           <div className="flex items-center justify-end gap-2">
             <Button
@@ -140,16 +133,16 @@ export function ProfileSettings() {
               disabled={saving || !dirty}
               size="sm"
             >
-              Reset
+              {t("settings.profile.reset")}
             </Button>
             <Button type="submit" disabled={saving || !dirty} size="sm">
-              {saving ? "Saving…" : "Save changes"}
+              {saving ? t("settings.profile.saving") : t("settings.profile.saveChanges")}
             </Button>
           </div>
         }
       >
         <div className="grid gap-5 sm:grid-cols-2">
-          <Field id="first-name" label="First name">
+          <Field id="first-name" label={t("settings.profile.firstName")}>
             <Input
               id="first-name"
               value={firstName}
@@ -159,7 +152,7 @@ export function ProfileSettings() {
               className="h-10 text-[13px]"
             />
           </Field>
-          <Field id="last-name" label="Last name">
+          <Field id="last-name" label={t("settings.profile.lastName")}>
             <Input
               id="last-name"
               value={lastName}
@@ -169,7 +162,7 @@ export function ProfileSettings() {
               className="h-10 text-[13px]"
             />
           </Field>
-          <Field id="email" label="Email">
+          <Field id="email" label={t("settings.profile.email")}>
             <Input
               id="email"
               type="email"
@@ -179,10 +172,10 @@ export function ProfileSettings() {
               className="h-10 cursor-not-allowed bg-[var(--color-muted)] text-[13px]"
             />
             <p className="mt-1 text-[11px] text-[var(--color-muted-foreground)]">
-              Contact your tenant admin to change your sign-in email.
+              {t("settings.profile.emailChangeHelp")}
             </p>
           </Field>
-          <Field id="phone" label="Phone">
+          <Field id="phone" label={t("settings.profile.phone")}>
             <Input
               id="phone"
               type="tel"
@@ -198,9 +191,9 @@ export function ProfileSettings() {
       </SettingsSection>
 
       <SettingsSection
-        title="Subject identifier"
+        title={t("settings.profile.subjectIdentifierTitle")}
         icon={Fingerprint}
-        description="The unique ID this account uses inside the platform. Read-only."
+        description={t("settings.profile.subjectIdentifierDescription")}
       >
         <code className="block w-full overflow-x-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-muted)] px-3 py-2 font-mono text-xs">
           {profile?.id ?? user?.id ?? "—"}

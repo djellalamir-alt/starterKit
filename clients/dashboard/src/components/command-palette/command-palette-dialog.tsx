@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Command } from "cmdk";
 import {
@@ -80,6 +81,7 @@ export function CommandPaletteDialog({
   onOpenChange: (next: boolean) => void;
 }) {
   const navigate = useNavigate();
+  const { t } = useTranslation(["command", "common", "navigation"]);
   const { user, logout } = useAuth();
   const { setMode, setAccent } = useTheme();
   const permissions = useMemo(() => user?.permissions ?? [], [user]);
@@ -101,11 +103,11 @@ export function CommandPaletteDialog({
     };
     const allGroups: ActionGroup[] = [
       {
-        heading: "Navigate",
+        heading: t("command:groups.navigate"),
         items: [
           {
             id: "nav-overview",
-            label: "Overview",
+            label: t("navigation:overview"),
             hint: "Tenant telemetry & usage",
             Icon: LayoutDashboard,
             keywords: ["home", "dashboard"],
@@ -113,7 +115,7 @@ export function CommandPaletteDialog({
           },
           {
             id: "nav-activity",
-            label: "Live activity",
+            label: t("navigation:liveActivity"),
             hint: "Real-time event stream",
             Icon: Activity,
             keywords: ["events", "sse", "log"],
@@ -121,7 +123,7 @@ export function CommandPaletteDialog({
           },
           {
             id: "nav-chat",
-            label: "Chat",
+            label: t("navigation:chat"),
             hint: "Channels & direct messages",
             Icon: MessageSquare,
             keywords: ["messages", "dm", "channel", "conversation"],
@@ -130,7 +132,7 @@ export function CommandPaletteDialog({
           },
           {
             id: "nav-files",
-            label: "Files",
+            label: t("navigation:myFiles"),
             hint: "My uploaded assets",
             Icon: Folder,
             keywords: ["storage", "uploads", "documents"],
@@ -139,7 +141,7 @@ export function CommandPaletteDialog({
           },
           {
             id: "nav-users",
-            label: "Users",
+            label: t("navigation:users"),
             hint: "Identity directory",
             Icon: Users,
             keywords: ["identity", "people", "members", "team"],
@@ -148,7 +150,7 @@ export function CommandPaletteDialog({
           },
           {
             id: "nav-roles",
-            label: "Roles",
+            label: t("navigation:roles"),
             hint: "Permissions & role assignment",
             Icon: ShieldCheck,
             keywords: ["identity", "permissions", "rbac"],
@@ -157,7 +159,7 @@ export function CommandPaletteDialog({
           },
           {
             id: "nav-groups",
-            label: "Groups",
+            label: t("navigation:groups"),
             hint: "Org groups & membership",
             Icon: Users,
             keywords: ["identity", "teams", "org"],
@@ -166,7 +168,7 @@ export function CommandPaletteDialog({
           },
           {
             id: "nav-products",
-            label: "Products",
+            label: t("navigation:products"),
             hint: "Catalog inventory",
             Icon: Package,
             keywords: ["catalog", "sku", "inventory", "stock"],
@@ -175,7 +177,7 @@ export function CommandPaletteDialog({
           },
           {
             id: "nav-brands",
-            label: "Brands",
+            label: t("navigation:brands"),
             hint: "Catalog brands",
             Icon: Tag,
             keywords: ["catalog"],
@@ -184,7 +186,7 @@ export function CommandPaletteDialog({
           },
           {
             id: "nav-categories",
-            label: "Categories",
+            label: t("navigation:categories"),
             hint: "Catalog categories",
             Icon: Boxes,
             keywords: ["catalog"],
@@ -193,7 +195,7 @@ export function CommandPaletteDialog({
           },
           {
             id: "nav-tickets",
-            label: "Tickets",
+            label: t("navigation:tickets"),
             hint: "Support requests",
             Icon: LifeBuoy,
             keywords: ["support", "issues", "helpdesk"],
@@ -202,7 +204,7 @@ export function CommandPaletteDialog({
           },
           {
             id: "nav-invoices",
-            label: "Invoices",
+            label: t("navigation:invoices"),
             hint: "Billing history",
             Icon: Receipt,
             keywords: ["billing", "payment"],
@@ -211,7 +213,7 @@ export function CommandPaletteDialog({
           },
           {
             id: "nav-health",
-            label: "Health",
+            label: t("navigation:health"),
             hint: "Readiness probe & dependencies",
             Icon: HeartPulse,
             keywords: ["status", "uptime", "system", "ready", "redis", "postgres"],
@@ -219,7 +221,7 @@ export function CommandPaletteDialog({
           },
           {
             id: "nav-audits",
-            label: "Audit trail",
+            label: t("navigation:auditTrail"),
             hint: "Activity, security, entity-change events",
             Icon: ScrollText,
             keywords: ["audit", "log", "compliance", "security", "trace", "correlation"],
@@ -228,7 +230,7 @@ export function CommandPaletteDialog({
           },
           {
             id: "nav-trash",
-            label: "Trash",
+            label: t("navigation:trash"),
             hint: "Soft-deleted records",
             Icon: ScrollText,
             keywords: ["recycle", "deleted", "restore"],
@@ -237,7 +239,7 @@ export function CommandPaletteDialog({
           },
           {
             id: "nav-sessions",
-            label: "Sessions",
+            label: t("navigation:sessions"),
             hint: "Active user sessions",
             Icon: Shield,
             keywords: ["devices", "logins"],
@@ -246,7 +248,7 @@ export function CommandPaletteDialog({
           },
           {
             id: "nav-settings",
-            label: "Settings",
+            label: t("navigation:settings"),
             Icon: SettingsIcon,
             keywords: ["preferences", "config"],
             perform: go("/settings"),
@@ -254,7 +256,7 @@ export function CommandPaletteDialog({
         ],
       },
       {
-        heading: "Create",
+        heading: t("command:groups.create"),
         items: [
           {
             id: "create-user",
@@ -340,11 +342,11 @@ export function CommandPaletteDialog({
         ],
       },
       {
-        heading: "Account",
+        heading: t("command:groups.account"),
         items: [
           {
             id: "acc-profile",
-            label: "Profile",
+            label: t("common:account.profile"),
             hint: "Name, email, contact",
             Icon: UserRound,
             perform: go("/settings/profile"),
@@ -359,7 +361,7 @@ export function CommandPaletteDialog({
           },
           {
             id: "acc-keys",
-            label: "API keys",
+            label: t("common:account.apiKeys"),
             hint: "Generate & rotate",
             Icon: KeyRound,
             keywords: ["token", "credentials"],
@@ -383,25 +385,25 @@ export function CommandPaletteDialog({
         ],
       },
       {
-        heading: "Theme",
+        heading: t("command:groups.theme"),
         items: [
           {
             id: "theme-light",
-            label: "Switch to light",
+            label: t("command:actions.switchLight"),
             Icon: Sun,
             keywords: ["bright", "day"],
             perform: () => setMode("light"),
           },
           {
             id: "theme-dark",
-            label: "Switch to dark",
+            label: t("command:actions.switchDark"),
             Icon: Moon,
             keywords: ["night", "oled"],
             perform: () => setMode("dark"),
           },
           {
             id: "theme-system",
-            label: "Follow system theme",
+            label: t("command:actions.followSystem"),
             Icon: Monitor,
             keywords: ["auto"],
             perform: () => setMode("system"),
@@ -409,7 +411,7 @@ export function CommandPaletteDialog({
         ],
       },
       {
-        heading: "Accent",
+        heading: t("command:groups.accent"),
         items: accents.map((a) => ({
           id: `accent-${a.id}`,
           label: `Set accent: ${a.label}`,
@@ -420,12 +422,12 @@ export function CommandPaletteDialog({
         })),
       },
       {
-        heading: "Session",
+        heading: t("command:groups.session"),
         items: [
           {
             id: "sess-logout",
-            label: "Sign out",
-            hint: "End this session",
+            label: t("common:actions.signOut"),
+            hint: t("command:actions.signOutHint"),
             Icon: LogOut,
             keywords: ["logout", "exit", "quit"],
             perform: () => {
@@ -441,7 +443,7 @@ export function CommandPaletteDialog({
     return allGroups
       .map((g) => ({ ...g, items: g.items.filter(visible) }))
       .filter((g) => g.items.length > 0);
-  }, [navigate, onOpenChange, setMode, setAccent, logout, permissions]);
+  }, [navigate, onOpenChange, setMode, setAccent, logout, permissions, t]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -451,9 +453,9 @@ export function CommandPaletteDialog({
           "bg-[var(--color-popover)]",
         )}
       >
-        <DialogTitle className="sr-only">Command palette</DialogTitle>
+        <DialogTitle className="sr-only">{t("command:dialogTitle")}</DialogTitle>
         <DialogDescription className="sr-only">
-          Search across pages, account actions, theme and accent. Use arrow keys to navigate; Enter to select.
+          {t("command:dialogDescription")}
         </DialogDescription>
 
         <Command
@@ -465,8 +467,8 @@ export function CommandPaletteDialog({
           <div className="flex items-center gap-2.5 border-b border-border px-4 py-3">
             <Search className="h-[18px] w-[18px] shrink-0 text-[oklch(from_var(--color-muted-foreground)_l_c_h_/_0.5)]" aria-hidden />
             <Command.Input
-              placeholder="Type a command or search…"
-              aria-label="Search commands"
+              placeholder={t("command:placeholder")}
+              aria-label={t("command:searchLabel")}
               className={cn(
                 "h-7 flex-1 bg-transparent text-[14px] tracking-tight placeholder:text-[var(--color-muted-foreground)]",
                 "focus:outline-none focus-visible:outline-none focus-visible:shadow-none",
@@ -481,9 +483,9 @@ export function CommandPaletteDialog({
           {/* Results */}
           <Command.List className="max-h-[420px] overflow-y-auto px-2 py-2">
             <Command.Empty className="px-4 py-12 text-center">
-              <p className="text-sm font-medium tracking-tight">No matches</p>
+              <p className="text-sm font-medium tracking-tight">{t("command:noMatches")}</p>
               <p className="mt-1 text-xs text-[var(--color-muted-foreground)]">
-                Try a different keyword — page name, entity, theme, accent, or sign-out.
+                {t("command:noMatchesHint")}
               </p>
             </Command.Empty>
 
@@ -512,11 +514,11 @@ export function CommandPaletteDialog({
               <span className="flex items-center gap-1">
                 <kbd className="rounded border border-border bg-[var(--color-muted)] px-1 py-px text-[9px]">↑</kbd>
                 <kbd className="rounded border border-border bg-[var(--color-muted)] px-1 py-px text-[9px]">↓</kbd>
-                navigate
+                {t("command:navigate")}
               </span>
               <span className="flex items-center gap-1">
                 <kbd className="rounded border border-border bg-[var(--color-muted)] px-1 py-px text-[9px]">↵</kbd>
-                select
+                {t("command:select")}
               </span>
             </div>
             <span className="text-[11px] text-[var(--color-muted-foreground)]">

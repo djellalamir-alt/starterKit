@@ -1,0 +1,24 @@
+{
+  "groups": {
+    "navigate": "Navigate",
+    "create": "Create",
+    "account": "Account",
+    "theme": "Theme",
+    "accent": "Accent",
+    "session": "Session"
+  },
+  "dialogTitle": "Command palette",
+  "dialogDescription": "Search across pages, account actions, theme and accent. Use arrow keys to navigate; Enter to select.",
+  "placeholder": "Type a command or search…",
+  "searchLabel": "Search commands",
+  "noMatches": "No matches",
+  "noMatchesHint": "Try a different keyword — page name, entity, theme, accent, or sign-out.",
+  "navigate": "navigate",
+  "select": "select",
+  "actions": {
+    "switchLight": "Switch to light",
+    "switchDark": "Switch to dark",
+    "followSystem": "Follow system theme",
+    "signOutHint": "End this session"
+  }
+}

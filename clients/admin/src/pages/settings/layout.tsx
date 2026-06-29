@@ -8,6 +8,7 @@ import {
   UserRound,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { DirectionalIcon } from "@shared/i18n";
 import { EntityPageHeader } from "@/components/list";
 import { cn } from "@/lib/cn";
 
@@ -91,14 +92,14 @@ export function SettingsLayout() {
         <nav aria-label="Settings sections">
           {/* Desktop: sticky vertical numbered list */}
           <div className="sticky top-6 hidden lg:block">
-            <p className="mb-4 pl-5 text-[10px] font-semibold uppercase tracking-[0.18em] text-[oklch(from_var(--color-muted-foreground)_l_c_h_/_0.6)]">
+            <p className="mb-4 ps-5 text-[10px] font-semibold uppercase tracking-[0.18em] text-[oklch(from_var(--color-muted-foreground)_l_c_h_/_0.6)]">
               Sections
             </p>
             <ul className="relative space-y-px">
               {/* Faint vertical rail tying the numbers together */}
               <div
                 aria-hidden
-                className="absolute bottom-1 left-[14px] top-1 w-px bg-[oklch(from_var(--color-border)_l_c_h_/_0.6)]"
+                className="absolute bottom-1 start-[14px] top-1 w-px bg-[oklch(from_var(--color-border)_l_c_h_/_0.6)]"
               />
               {TABS.map((t, i) => {
                 const num = pad2(i + 1);
@@ -109,7 +110,7 @@ export function SettingsLayout() {
                       end
                       className={({ isActive }) =>
                         cn(
-                          "group relative flex w-full cursor-pointer items-start gap-3 rounded-lg py-3 pl-5 pr-3 text-left transition-all",
+                          "group relative flex w-full cursor-pointer items-start gap-3 rounded-lg py-3 ps-5 pe-3 text-start transition-all",
                           isActive
                             ? "bg-[var(--color-card)] shadow-xs"
                             : "hover:bg-[oklch(from_var(--color-muted)_l_c_h_/_0.4)]",
@@ -121,7 +122,7 @@ export function SettingsLayout() {
                           {isActive && (
                             <span
                               aria-hidden
-                              className="absolute left-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-full bg-[var(--color-primary)]"
+                              className="absolute start-0 top-1/2 h-7 w-[3px] -translate-y-1/2 rounded-full bg-[var(--color-primary)]"
                             />
                           )}
                           <span
@@ -149,8 +150,8 @@ export function SettingsLayout() {
                               {t.hint}
                             </span>
                           </span>
-                          <ChevronRight
-                            aria-hidden
+                          <DirectionalIcon
+                            icon={ChevronRight}
                             className={cn(
                               "mt-1 size-3.5 shrink-0 transition-all",
                               isActive

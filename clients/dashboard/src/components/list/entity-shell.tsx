@@ -1,6 +1,7 @@
 import * as React from "react";
 import { ChevronLeft, ChevronRight, Search } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { useDirection } from "@shared/i18n";
 import { cn } from "@/lib/cn";
 import { ToneIconTile, type ToneIconTileTone } from "./tone-icon-tile";
 
@@ -77,7 +78,7 @@ export function EntitySearch({
 }) {
   return (
     <div className="relative">
-      <Search className="pointer-events-none absolute left-4 top-1/2 size-[18px] -translate-y-1/2 text-[oklch(from_var(--color-muted-foreground)_l_c_h_/_0.5)]" />
+      <Search className="pointer-events-none absolute start-4 top-1/2 size-[18px] -translate-y-1/2 text-[oklch(from_var(--color-muted-foreground)_l_c_h_/_0.5)]" />
       <input
         type="text"
         placeholder={placeholder}
@@ -87,7 +88,7 @@ export function EntitySearch({
         autoFocus={autoFocus}
         className={cn(
           "h-[46px] w-full rounded-xl border border-[var(--color-border)] bg-[var(--color-card)]",
-          "pl-12 pr-4 text-[14px] font-normal text-[var(--color-foreground)] outline-none",
+          "ps-12 pe-4 text-[14px] font-normal text-[var(--color-foreground)] outline-none",
           "placeholder:text-[var(--color-muted-foreground)]",
           "shadow-xs",
           "transition-all duration-200",
@@ -98,7 +99,7 @@ export function EntitySearch({
         <button
           onClick={() => onChange("")}
           aria-label="Clear search"
-          className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer text-[11px] font-medium text-[var(--color-muted-foreground)] transition-colors hover:text-[var(--color-foreground)]"
+          className="absolute end-4 top-1/2 -translate-y-1/2 cursor-pointer text-[11px] font-medium text-[var(--color-muted-foreground)] transition-colors hover:text-[var(--color-foreground)]"
           type="button"
         >
           Clear
@@ -172,6 +173,7 @@ export function EntityPager({
   onPrev: () => void;
   onNext: () => void;
 }) {
+  const { isRtl } = useDirection();
   if (totalPages <= 1) return null;
   return (
     <div className="mt-3 flex items-center justify-between">
@@ -186,7 +188,7 @@ export function EntityPager({
           aria-label="Previous page"
           className="grid size-8 cursor-pointer place-items-center rounded-lg text-[var(--color-muted-foreground)] transition-colors hover:bg-[oklch(from_var(--color-muted)_l_c_h_/_0.5)] hover:text-[var(--color-foreground)] disabled:cursor-not-allowed disabled:opacity-30"
         >
-          <ChevronLeft className="size-4" />
+          <ChevronLeft className={cn("size-4", isRtl && "scale-x-[-1]")} />
         </button>
         <button
           type="button"
@@ -195,7 +197,7 @@ export function EntityPager({
           aria-label="Next page"
           className="grid size-8 cursor-pointer place-items-center rounded-lg text-[var(--color-muted-foreground)] transition-colors hover:bg-[oklch(from_var(--color-muted)_l_c_h_/_0.5)] hover:text-[var(--color-foreground)] disabled:cursor-not-allowed disabled:opacity-30"
         >
-          <ChevronRight className="size-4" />
+          <ChevronRight className={cn("size-4", isRtl && "scale-x-[-1]")} />
         </button>
       </div>
     </div>
@@ -348,7 +350,7 @@ export const EntityMobileCard = React.forwardRef<
   <a
     ref={ref}
     className={cn(
-      "block rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 text-left",
+      "block rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 text-start",
       "shadow-xs",
       "transition-colors hover:bg-[oklch(from_var(--color-accent)_l_c_h_/_0.4)] active:bg-[oklch(from_var(--color-accent)_l_c_h_/_0.6)]",
       "outline-none focus-visible:ring-[3px] focus-visible:ring-[oklch(from_var(--color-ring)_l_c_h_/_0.4)]",

@@ -1,5 +1,7 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useDirection } from "@shared/i18n";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/cn";
 
 type PaginationProps = {
   page: number;
@@ -32,6 +34,7 @@ export function Pagination({
   onNext,
   noun = "items",
 }: PaginationProps) {
+  const { isRtl } = useDirection();
   const p = String(page).padStart(2, "0");
   const tp = String(Math.max(totalPages, 1)).padStart(2, "0");
   return (
@@ -41,10 +44,10 @@ export function Pagination({
       </span>
       <div className="flex items-center gap-2">
         <Button variant="outline" size="sm" disabled={!hasPrev || fetching} onClick={onPrev}>
-          <ChevronLeft className="mr-1 h-3.5 w-3.5" /> Previous
+          <ChevronLeft className={cn("me-1 h-3.5 w-3.5", isRtl && "scale-x-[-1]")} /> Previous
         </Button>
         <Button variant="outline" size="sm" disabled={!hasNext || fetching} onClick={onNext}>
-          Next <ChevronRight className="ml-1 h-3.5 w-3.5" />
+          Next <ChevronRight className={cn("ms-1 h-3.5 w-3.5", isRtl && "scale-x-[-1]")} />
         </Button>
       </div>
     </div>

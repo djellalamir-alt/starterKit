@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { ChevronLeft, ChevronRight, Plus, Users } from "lucide-react";
+import { localizeApiError } from "@shared/i18n";
 import { searchUsers, type UserDto } from "@/api/users";
 import { listRoles } from "@/api/roles";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Monogram } from "@/components/monogram";
 import { EntityPageHeader, ErrorBand } from "@/components/list";
-import { ApiRequestError } from "@/lib/api-client";
 import { cn } from "@/lib/cn";
 import { CreateUserDialog } from "@/components/users/create-user-dialog";
 
@@ -27,6 +28,7 @@ const DESKTOP_COLS =
   "grid-cols-[1fr_140px_24px] lg:grid-cols-[1.6fr_140px_180px_24px]";
 
 export function UsersListPage() {
+  const { t } = useTranslation(["errors"]);
   const navigate = useNavigate();
 
   const [pageNumber, setPageNumber] = useState(1);
@@ -163,13 +165,7 @@ export function UsersListPage() {
       </div>
 
       {usersQuery.isError && (
-        <ErrorBand
-          message={
-            usersQuery.error instanceof ApiRequestError
-              ? usersQuery.error.problem?.detail ?? usersQuery.error.message
-              : "Failed to load users."
-          }
-        />
+        <ErrorBand message={localizeApiError(usersQuery.error, t)} />
       )}
 
       {usersQuery.isLoading && items.length === 0 && (
@@ -306,7 +302,7 @@ function UserMobileCard({
         onClick={onClick}
         aria-label={`Open user ${display}`}
         className={cn(
-          "group w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 text-left shadow-xs",
+          "group w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 text-start shadow-xs",
           "transition-colors hover:border-[var(--color-border-strong)] hover:bg-[var(--color-accent)]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]",
           !user.isActive && "opacity-75",
@@ -332,7 +328,7 @@ function UserMobileCard({
           </div>
           <ChevronRight className="size-4 shrink-0 text-[var(--color-border)] transition-colors group-hover:text-[var(--color-muted-foreground)]" />
         </div>
-        <div className="mt-2 ml-[52px] flex flex-wrap items-center gap-1.5">
+        <div className="mt-2 ms-[52px] flex flex-wrap items-center gap-1.5">
           <span
             className={cn(
               "inline-flex items-center gap-1 rounded-full px-1.5 py-0.5 text-[10.5px] font-medium",
@@ -378,7 +374,7 @@ function UserDesktopRow({
         type="button"
         onClick={onClick}
         className={cn(
-          `group grid w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-[var(--color-accent)] focus-visible:bg-[var(--color-accent)] focus-visible:outline-none ${DESKTOP_COLS}`,
+          `group grid w-full items-center gap-3 px-4 py-3.5 text-start transition-colors hover:bg-[var(--color-accent)] focus-visible:bg-[var(--color-accent)] focus-visible:outline-none ${DESKTOP_COLS}`,
           !user.isActive && "opacity-75",
         )}
       >

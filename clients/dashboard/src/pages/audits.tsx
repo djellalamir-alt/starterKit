@@ -18,6 +18,7 @@ import {
   Tag,
   X,
 } from "lucide-react";
+import { formatNumber } from "@shared/i18n";
 import {
   AuditEventType,
   AuditSeverity,
@@ -625,7 +626,7 @@ function SummaryStrip({
             Window {range}
           </div>
           <div className="mt-1 font-display text-2xl font-semibold tabular-nums leading-none">
-            {new Intl.NumberFormat("en-US").format(total)}
+            {formatNumber(total)}
           </div>
           <div className="mt-1 text-[11px] text-[var(--color-muted-foreground)]">events</div>
         </div>

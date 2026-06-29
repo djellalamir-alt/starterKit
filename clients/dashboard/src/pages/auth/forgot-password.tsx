@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { Link, Navigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -10,13 +11,13 @@ import {
   Mail,
   MailCheck,
 } from "lucide-react";
+import { DirectionalIcon, localizeApiError, useDirection } from "@shared/i18n";
 import { useAuth } from "@/auth/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthHeadline, AuthShell } from "@/components/auth/auth-shell";
 import { requestPasswordReset } from "@/api/identity";
-import { ApiRequestError } from "@/lib/api-client";
 import { cn } from "@/lib/cn";
 import { env } from "@/env";
 
@@ -30,6 +31,8 @@ import { env } from "@/env";
  * inbox" success state after a 2xx.
  */
 export function ForgotPasswordPage() {
+  const { t } = useTranslation("auth");
+  const { isRtl } = useDirection();
   const { isAuthenticated } = useAuth();
   const [email, setEmail] = useState("");
   const [tenant, setTenant] = useState(env.defaultTenant);
@@ -43,11 +46,7 @@ export function ForgotPasswordPage() {
       // Most failures here are infra (tenant not resolvable, server down) —
       // we surface those plainly; account-existence is intentionally hidden
       // by the server's uniform 200 response.
-      const detail =
-        err instanceof ApiRequestError
-          ? err.problem?.detail ?? err.problem?.title ?? err.message
-          : (err as Error).message;
-      setError(detail);
+      setError(localizeApiError(err, t));
     },
   });
 
@@ -65,12 +64,12 @@ export function ForgotPasswordPage() {
     <AuthShell
       footer={
         <span>
-          Remembered it?{" "}
+          {t("forgotPassword.remembered")}{" "}
           <Link
             to="/login"
             className="text-[var(--color-foreground)] underline-offset-4 hover:underline"
           >
-            Sign in
+            {t("forgotPassword.signIn")}
           </Link>
         </span>
       }
@@ -86,23 +85,24 @@ export function ForgotPasswordPage() {
             </span>
           </div>
           <div>
-            <AuthHeadline lead="Check your" accent="inbox" />
+            <AuthHeadline lead={t("forgotPassword.checkInboxLead")} accent={t("forgotPassword.checkInboxAccent")} />
             <p className="text-[13px] leading-relaxed text-[var(--color-muted-foreground)]">
-              If an account exists for{" "}
-              <span className="text-[var(--color-foreground)]">{email}</span> in
-              tenant{" "}
-              <span className="text-[var(--color-foreground)]">{tenant}</span>,
-              a one-time reset link is on its way. The link expires in 30 minutes.
+              <Trans
+                i18nKey="forgotPassword.successDescription"
+                ns="auth"
+                values={{ email, tenant }}
+                components={{ strong: <span className="text-[var(--color-foreground)]" /> }}
+              />
             </p>
           </div>
-          <ul className="space-y-1.5 text-left text-[12.5px] text-[var(--color-muted-foreground)]">
+          <ul className="space-y-1.5 text-start text-[12.5px] text-[var(--color-muted-foreground)]">
             <li className="flex items-start gap-2">
               <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--color-success)]" />
-              Didn't get it? Wait a minute, then check spam.
+              {t("forgotPassword.tipWait")}
             </li>
             <li className="flex items-start gap-2">
               <Check className="mt-0.5 size-3.5 shrink-0 text-[var(--color-success)]" />
-              Still nothing? Confirm the email + tenant and try again.
+              {t("forgotPassword.tipRetry")}
             </li>
           </ul>
           <div className="flex items-center gap-2 pt-1">
@@ -114,11 +114,11 @@ export function ForgotPasswordPage() {
                 setError(null);
               }}
             >
-              Try a different address
+              {t("forgotPassword.tryDifferent")}
             </Button>
-            <Link to="/login" className="ml-auto">
+            <Link to="/login" className="ms-auto">
               <Button type="button" variant="outline">
-                Back to sign in
+                {t("forgotPassword.backToSignIn")}
               </Button>
             </Link>
           </div>
@@ -126,9 +126,9 @@ export function ForgotPasswordPage() {
       ) : (
         <>
           <div className="mb-6 sm:mb-8">
-            <AuthHeadline lead="Reset your" accent="password" />
+            <AuthHeadline lead={t("forgotPassword.titleLead")} accent={t("forgotPassword.titleAccent")} />
             <p className="text-[13px] text-[var(--color-muted-foreground)]">
-              Enter the email you sign in with. We'll send a one-time link.
+              {t("forgotPassword.subtitle")}
             </p>
           </div>
 
@@ -138,10 +138,10 @@ export function ForgotPasswordPage() {
                 htmlFor="reset-tenant"
                 className="block text-[11.5px] font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]"
               >
-                Tenant
+                {t("login.tenant")}
               </Label>
               <div className="relative">
-                <Building2 className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[oklch(from_var(--color-muted-foreground)_l_c_h_/_0.6)]" />
+                <Building2 className="pointer-events-none absolute start-3.5 top-1/2 size-4 -translate-y-1/2 text-[oklch(from_var(--color-muted-foreground)_l_c_h_/_0.6)]" />
                 <Input
                   id="reset-tenant"
                   value={tenant}
@@ -151,7 +151,7 @@ export function ForgotPasswordPage() {
                   required
                   aria-invalid={error ? true : undefined}
                   aria-describedby={error ? "forgot-error" : undefined}
-                  className="h-11 pl-10 text-[14px]"
+                  className="h-11 ps-10 text-[14px]"
                 />
               </div>
             </div>
@@ -161,10 +161,10 @@ export function ForgotPasswordPage() {
                 htmlFor="reset-email"
                 className="block text-[11.5px] font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]"
               >
-                Email
+                {t("login.email")}
               </Label>
               <div className="relative">
-                <Mail className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[oklch(from_var(--color-muted-foreground)_l_c_h_/_0.6)]" />
+                <Mail className="pointer-events-none absolute start-3.5 top-1/2 size-4 -translate-y-1/2 text-[oklch(from_var(--color-muted-foreground)_l_c_h_/_0.6)]" />
                 <Input
                   id="reset-email"
                   type="email"
@@ -176,7 +176,7 @@ export function ForgotPasswordPage() {
                   autoFocus
                   aria-invalid={error ? true : undefined}
                   aria-describedby={error ? "forgot-error" : undefined}
-                  className="h-11 pl-10 text-[14px]"
+                  className="h-11 ps-10 text-[14px]"
                 />
               </div>
             </div>
@@ -206,12 +206,18 @@ export function ForgotPasswordPage() {
                 {mutation.isPending ? (
                   <>
                     <Loader2 className="size-4 animate-spin" />
-                    <span>Sending link…</span>
+                    <span>{t("forgotPassword.sendingLink")}</span>
                   </>
                 ) : (
                   <>
-                    <span>Send reset link</span>
-                    <ArrowRight className="size-[14px] opacity-60 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100" />
+                    <span>{t("forgotPassword.sendLink")}</span>
+                    <DirectionalIcon
+                      icon={ArrowRight}
+                      className={cn(
+                        "size-[14px] opacity-60 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100",
+                        isRtl && "group-hover:-translate-x-0.5",
+                      )}
+                    />
                   </>
                 )}
               </Button>

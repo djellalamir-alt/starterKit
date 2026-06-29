@@ -7,9 +7,10 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatStrip, Stat, SettingsSection } from "@/components/list";
 import { PlanFormDialog } from "@/components/billing/plan-form-dialog";
-import { ApiRequestError } from "@/lib/api-client";
 import { useAuth } from "@/auth/use-auth";
 import { BillingPermissions } from "@/lib/permissions";
+import { localizeApiError } from "@shared/i18n";
+import { useTranslation } from "react-i18next";
 
 // ─── helpers ──────────────────────────────────────────────────────────
 
@@ -29,15 +30,10 @@ function formatOverageRates(rates: BillingPlanDto["overageRates"], currency: str
     .join(" · ");
 }
 
-function describe(err: unknown): string {
-  if (err instanceof ApiRequestError) return err.problem?.detail ?? err.problem?.title ?? err.message;
-  if (err instanceof Error) return err.message;
-  return "Failed to load plans.";
-}
-
 // ─── component ────────────────────────────────────────────────────────
 
 export function PlansListPage() {
+  const { t } = useTranslation(["errors"]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingPlan, setEditingPlan] = useState<BillingPlanDto | undefined>(undefined);
   const { user: currentUser } = useAuth();
@@ -115,7 +111,7 @@ export function PlansListPage() {
       >
         {query.isError && (
           <div className="mb-4 rounded-md border border-[oklch(from_var(--color-destructive)_l_c_h_/_0.30)] bg-[oklch(from_var(--color-destructive)_l_c_h_/_0.05)] px-4 py-3 text-sm text-[var(--color-destructive)]">
-            {describe(query.error)}
+            {localizeApiError(query.error, t)}
           </div>
         )}
 
@@ -162,7 +158,7 @@ export function PlansListPage() {
 
                 {/* Right column — price + edit */}
                 <div className="flex items-center gap-4">
-                  <div className="text-right">
+                  <div className="text-end">
                     <div className="text-display text-lg font-semibold leading-none tabular-nums">
                       {formatMoney(planTermPrice(plan), plan.currency)}
                     </div>

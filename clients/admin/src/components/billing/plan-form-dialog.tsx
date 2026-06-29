@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 import { CreditCard, Gauge } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -22,7 +23,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ApiRequestError } from "@/lib/api-client";
+import { localizeApiError } from "@shared/i18n";
 
 const PLAN_KEY_PATTERN = /^[a-z0-9][a-z0-9-]{0,62}[a-z0-9]$/;
 
@@ -80,12 +81,6 @@ function fieldError(schema: z.ZodTypeAny, value: string): string | undefined {
   return result.success ? undefined : result.error.issues[0]?.message;
 }
 
-function describe(err: unknown, fallback: string): string {
-  if (err instanceof ApiRequestError) return err.problem?.detail ?? err.problem?.title ?? err.message;
-  if (err instanceof Error) return err.message;
-  return fallback;
-}
-
 function SectionLabel({
   icon: Icon,
   title,
@@ -125,6 +120,7 @@ export function PlanFormDialog({
   plan?: BillingPlanDto;
 }) {
   const queryClient = useQueryClient();
+  const { t } = useTranslation(["errors"]);
   const isEdit = !!plan;
 
   const [key, setKey] = useState("");
@@ -184,7 +180,7 @@ export function PlanFormDialog({
       queryClient.invalidateQueries({ queryKey: ["billing", "plans"] });
       onClose();
     },
-    onError: (err) => toast.error("Create failed", { description: describe(err, "Could not create plan.") }),
+    onError: (err) => toast.error("Create failed", { description: localizeApiError(err, t) }),
   });
 
   const updateMutation = useMutation({
@@ -194,7 +190,7 @@ export function PlanFormDialog({
       queryClient.invalidateQueries({ queryKey: ["billing", "plans"] });
       onClose();
     },
-    onError: (err) => toast.error("Update failed", { description: describe(err, "Could not update plan.") }),
+    onError: (err) => toast.error("Update failed", { description: localizeApiError(err, t) }),
   });
 
   const pending = createMutation.isPending || updateMutation.isPending;

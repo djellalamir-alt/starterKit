@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import {
   keepPreviousData,
@@ -31,12 +32,13 @@ import {
 } from "@/components/list";
 import { EmptyState } from "@/components/empty-state";
 import { CreateWebhookDialog } from "@/components/webhooks/create-webhook-dialog";
-import { ApiRequestError } from "@/lib/api-client";
+import { formatDate as formatLocalizedDate, localizeApiError } from "@shared/i18n";
 import { cn } from "@/lib/cn";
 
 const PAGE_SIZE = 25;
 
 export function WebhooksListPage() {
+  const { t } = useTranslation(["errors"]);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
@@ -63,7 +65,7 @@ export function WebhooksListPage() {
         });
       }
     },
-    onError: (err) => toast.error("Test failed", { description: describe(err) }),
+    onError: (err) => toast.error("Test failed", { description: localizeApiError(err, t) }),
     onSettled: () => setBusyId(null),
   });
 
@@ -74,7 +76,7 @@ export function WebhooksListPage() {
       toast.success("Subscription deleted");
       queryClient.invalidateQueries({ queryKey: ["webhooks", "subscriptions"] });
     },
-    onError: (err) => toast.error("Delete failed", { description: describe(err) }),
+    onError: (err) => toast.error("Delete failed", { description: localizeApiError(err, t) }),
     onSettled: () => setBusyId(null),
   });
 
@@ -97,23 +99,15 @@ export function WebhooksListPage() {
           onClick={() => query.refetch()}
           className="flex-1 sm:flex-none"
         >
-          <RefreshCw className={cn("mr-1.5 h-3.5 w-3.5", query.isFetching && "animate-spin")} />
+          <RefreshCw className={cn("me-1.5 h-3.5 w-3.5", query.isFetching && "animate-spin")} />
           Refresh
         </Button>
         <Button onClick={() => setCreateOpen(true)} className="flex-1 sm:flex-none">
-          <Plus className="mr-1 h-4 w-4" /> New subscription
-        </Button>
+<Plus className="ms-1 h-4 w-4" /> New subscription
+            </Button>
       </EntityPageHeader>
 
-      {query.isError && (
-        <ErrorBand
-          message={
-            query.error instanceof ApiRequestError
-              ? query.error.problem?.detail ?? query.error.message
-              : "Failed to load subscriptions."
-          }
-        />
-      )}
+      {query.isError && <ErrorBand message={localizeApiError(query.error, t)} />}
 
       {query.isLoading && <LoadingRow label="Loading subscriptions" />}
 
@@ -125,7 +119,7 @@ export function WebhooksListPage() {
           description="Add an endpoint and pick which events should fire. We'll retry failed deliveries automatically."
           action={
             <Button onClick={() => setCreateOpen(true)}>
-              <Plus className="mr-1 h-4 w-4" /> New subscription
+<Plus className="ms-1 h-4 w-4" /> New subscription
             </Button>
           }
         />
@@ -208,7 +202,7 @@ function Row({
         <button
           type="button"
           onClick={onOpen}
-          className="min-w-0 text-left transition-colors hover:bg-[var(--color-muted)]/40 -mx-2 px-2 py-1 rounded-md"
+          className="min-w-0 text-start transition-colors hover:bg-[var(--color-muted)]/40 -mx-2 px-2 py-1 rounded-md"
         >
           <div className="truncate font-mono text-[13px] font-medium">{sub.url}</div>
           <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
@@ -221,7 +215,7 @@ function Row({
               </span>
             )}
             <span className="font-mono text-[10.5px] uppercase tracking-[0.18em] text-[var(--color-muted-foreground)]">
-              · since {new Date(sub.createdAtUtc).toLocaleDateString()}
+              · since {formatLocalizedDate(sub.createdAtUtc)}
             </span>
           </div>
         </button>
@@ -232,7 +226,7 @@ function Row({
           {sub.isActive ? "Active" : "Inactive"}
         </Badge>
         <Button variant="outline" size="sm" onClick={onTest} disabled={busy}>
-          <Send className="mr-1 h-3.5 w-3.5" /> Test
+          <Send className="me-1 h-3.5 w-3.5" /> Test
         </Button>
         <Button
           variant="ghost"
@@ -253,8 +247,3 @@ function Row({
   );
 }
 
-function describe(err: unknown): string {
-  if (err instanceof ApiRequestError) return err.problem?.detail ?? err.problem?.title ?? err.message;
-  if (err instanceof Error) return err.message;
-  return String(err);
-}

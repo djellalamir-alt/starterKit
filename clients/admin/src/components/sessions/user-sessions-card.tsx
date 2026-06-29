@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { LogOut, Monitor, Smartphone } from "lucide-react";
 import { toast } from "sonner";
+import { formatDate as formatLocalizedDate, localizeApiError } from "@shared/i18n";
 import {
   adminRevokeAllUserSessions,
   adminRevokeUserSession,
@@ -17,7 +19,6 @@ import {
   FormShell,
 } from "@/components/list";
 import { IdentityPermissions } from "@/lib/permissions";
-import { ApiRequestError } from "@/lib/api-client";
 import { cn } from "@/lib/cn";
 
 /**
@@ -26,6 +27,7 @@ import { cn } from "@/lib/cn";
  * Hidden when the operator lacks Sessions.ViewAll.
  */
 export function UserSessionsCard({ userId }: { userId: string }) {
+  const { t } = useTranslation(["errors"]);
   const { user } = useAuth();
   const granted = user?.permissions ?? [];
   const canView = granted.includes(IdentityPermissions.Sessions.ViewAll);
@@ -57,7 +59,7 @@ export function UserSessionsCard({ userId }: { userId: string }) {
       toast.success("Session revoked");
       queryClient.invalidateQueries({ queryKey: ["admin", "user-sessions", userId] });
     },
-    onError: (err) => toast.error("Revoke failed", { description: describe(err) }),
+    onError: (err) => toast.error("Revoke failed", { description: localizeApiError(err, t) }),
     onSettled: (_d, _e, sessionId) => clearBusy(sessionId),
   });
 
@@ -67,7 +69,7 @@ export function UserSessionsCard({ userId }: { userId: string }) {
       toast.success(`Revoked ${data.revokedCount} ${data.revokedCount === 1 ? "session" : "sessions"}`);
       queryClient.invalidateQueries({ queryKey: ["admin", "user-sessions", userId] });
     },
-    onError: (err) => toast.error("Revoke all failed", { description: describe(err) }),
+    onError: (err) => toast.error("Revoke all failed", { description: localizeApiError(err, t) }),
   });
 
   if (!canView) return null;
@@ -82,13 +84,7 @@ export function UserSessionsCard({ userId }: { userId: string }) {
         description="Active browser/device sessions for this user. Revoking signs the device out within ~10 seconds."
       >
         {query.isError ? (
-          <ErrorBand
-            message={
-              query.error instanceof ApiRequestError
-                ? query.error.problem?.detail ?? query.error.message
-                : "Failed to load sessions."
-            }
-          />
+          <ErrorBand message={localizeApiError(query.error, t)} />
         ) : query.isLoading ? (
           <p className="meta text-[var(--color-muted-foreground)]">
             Loading<span className="caret text-[var(--color-accent-signal)]" />
@@ -122,7 +118,7 @@ export function UserSessionsCard({ userId }: { userId: string }) {
                   onClick={() => revokeAll.mutate()}
                   disabled={revokeAll.isPending}
                 >
-                  <LogOut className="mr-1.5 h-3.5 w-3.5" />
+                  <LogOut className="me-1.5 h-3.5 w-3.5" />
                   {revokeAll.isPending ? "Signing out…" : "Revoke all sessions"}
                 </Button>
               </div>
@@ -172,7 +168,7 @@ function SessionRow({
       )}
       {canRevoke ? (
         <Button variant="outline" size="sm" onClick={onRevoke} disabled={busy}>
-          <LogOut className="mr-1.5 h-3.5 w-3.5" />
+          <LogOut className="me-1.5 h-3.5 w-3.5" />
           {busy ? "Revoking…" : "Revoke"}
         </Button>
       ) : (
@@ -202,11 +198,5 @@ function formatRelative(value?: string | null): string {
   if (hr < 24) return `${hr}h ago`;
   const day = Math.round(hr / 24);
   if (day < 14) return `${day}d ago`;
-  return d.toLocaleDateString();
-}
-
-function describe(err: unknown): string {
-  if (err instanceof ApiRequestError) return err.problem?.detail ?? err.problem?.title ?? err.message;
-  if (err instanceof Error) return err.message;
-  return String(err);
+  return formatLocalizedDate(d);
 }

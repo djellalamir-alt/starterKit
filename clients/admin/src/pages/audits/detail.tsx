@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import {
   AlertTriangle,
@@ -14,7 +15,7 @@ import { getAudit, type AuditDetailDto } from "@/api/audits";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ErrorBand, LoadingRow } from "@/components/list";
-import { ApiRequestError } from "@/lib/api-client";
+import { localizeApiError } from "@shared/i18n";
 import {
   Sheet,
   SheetContent,
@@ -61,6 +62,8 @@ export function AuditDetailSheetBody({
   auditId: string | null;
   onClose: () => void;
 }) {
+  const { t } = useTranslation(["errors"]);
+
   const query = useQuery({
     queryKey: ["audits", auditId],
     queryFn: () => getAudit(auditId!),
@@ -112,13 +115,7 @@ export function AuditDetailSheetBody({
 
         {query.isError && (
           <div className="p-6">
-            <ErrorBand
-              message={
-                query.error instanceof ApiRequestError
-                  ? query.error.problem?.detail ?? query.error.message
-                  : "Failed to load event."
-              }
-            />
+            <ErrorBand message={localizeApiError(query.error, t)} />
           </div>
         )}
 
@@ -227,7 +224,7 @@ function CorrelationChip({ label, value }: { label: string; value: string | null
       onClick={onCopy}
       disabled={!hasValue}
       className={cn(
-        "group/chip flex min-w-0 items-start gap-3 rounded-lg border border-[var(--color-border)] px-3 py-2.5 text-left transition-colors",
+        "group/chip flex min-w-0 items-start gap-3 rounded-lg border border-[var(--color-border)] px-3 py-2.5 text-start transition-colors",
         hasValue
           ? "hover:bg-[var(--color-muted)]/50"
           : "opacity-60",

@@ -28,6 +28,7 @@ import {
   type ToneIconTileTone,
 } from "@/components/list";
 import { cn } from "@/lib/cn";
+import { formatDate } from "@shared/i18n";
 
 // ────────────────────────────────────────────────────────────────────────
 // Tone helpers — keep status-to-aesthetic mapping in one place so the
@@ -353,7 +354,10 @@ function HeroPanel({
             <Vital
               label="Last poll"
               value={formatRelative(snapshot.fetchedAt)}
-              hint={new Date(snapshot.fetchedAt).toLocaleTimeString("en-US", {
+              hint={formatDate(snapshot.fetchedAt, {
+                hour: "numeric",
+                minute: "2-digit",
+                second: "2-digit",
                 hour12: false,
               })}
             />
@@ -423,7 +427,7 @@ function HistoryPips({ ticks }: { ticks: Tick[] }) {
           className="h-6 flex-1 rounded-[2px] transition-colors"
           title={
             tick
-              ? `${tick.status} · ${new Date(tick.at).toLocaleTimeString()}`
+              ? `${tick.status} · ${formatDate(tick.at, { hour: "numeric", minute: "2-digit" })}`
               : "no data"
           }
           style={{

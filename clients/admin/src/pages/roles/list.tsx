@@ -1,13 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronRight, Plus, Shield, ShieldCheck } from "lucide-react";
+import { localizeApiError } from "@shared/i18n";
 import { listRoles, type RoleDto } from "@/api/roles";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { EntityPageHeader, ErrorBand, LoadingRow } from "@/components/list";
 import { EmptyState } from "@/components/empty-state";
-import { ApiRequestError } from "@/lib/api-client";
 import { CreateRoleDialog } from "@/components/roles/create-role-dialog";
 
 const ROOT_ROLE_NAMES = new Set(["Admin", "Basic"]);
@@ -17,6 +18,7 @@ const DESKTOP_COLS =
   "grid-cols-[1fr_120px_24px] lg:grid-cols-[1.4fr_2fr_120px_24px]";
 
 export function RolesListPage() {
+  const { t } = useTranslation(["errors"]);
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
@@ -85,13 +87,7 @@ export function RolesListPage() {
       </div>
 
       {query.isError && (
-        <ErrorBand
-          message={
-            query.error instanceof ApiRequestError
-              ? query.error.problem?.detail ?? query.error.message
-              : "Failed to load roles."
-          }
-        />
+        <ErrorBand message={localizeApiError(query.error, t)} />
       )}
 
       {query.isLoading && <LoadingRow label="Loading roles" />}
@@ -196,7 +192,7 @@ function RoleMobileCard({
         type="button"
         onClick={onClick}
         aria-label={`Open role ${role.name}`}
-        className="group w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 text-left shadow-xs transition-colors hover:border-[var(--color-border-strong)] hover:bg-[var(--color-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
+        className="group w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 text-start shadow-xs transition-colors hover:border-[var(--color-border-strong)] hover:bg-[var(--color-accent)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
       >
         <div className="flex items-center justify-between">
           <div className="flex min-w-0 items-center gap-3">
@@ -230,7 +226,7 @@ function RoleMobileCard({
           <ChevronRight className="size-4 shrink-0 text-[var(--color-border)] transition-colors group-hover:text-[var(--color-muted-foreground)]" />
         </div>
         {role.permissions != null && (
-          <div className="mt-2 ml-[52px]">
+          <div className="mt-2 ms-[52px]">
             <span className="inline-flex items-center rounded-full bg-[oklch(from_var(--color-info)_l_c_h_/_0.12)] px-2 py-0.5 text-[10.5px] font-medium text-[var(--color-info)]">
               {role.permissions.length}{" "}
               {role.permissions.length === 1 ? "permission" : "permissions"}
@@ -264,7 +260,7 @@ function RoleDesktopRow({
       <button
         type="button"
         onClick={onClick}
-        className={`group grid w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-[var(--color-accent)] focus-visible:outline-none focus-visible:bg-[var(--color-accent)] ${DESKTOP_COLS} ${isLast ? "" : ""}`}
+        className={`group grid w-full items-center gap-3 px-4 py-3.5 text-start transition-colors hover:bg-[var(--color-accent)] focus-visible:outline-none focus-visible:bg-[var(--color-accent)] ${DESKTOP_COLS} ${isLast ? "" : ""}`}
       >
         {/* Name */}
         <div className="flex min-w-0 items-center gap-3">

@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Monitor, Moon, Palette, Sun } from "lucide-react";
+import { useLanguageSwitcher, type Language } from "@shared/i18n";
 import {
   Card,
   CardContent,
@@ -33,16 +35,16 @@ import { cn } from "@/lib/cn";
 
 const themeOptions: Array<{
   value: ThemeMode;
-  label: string;
-  description: string;
   Icon: React.ComponentType<{ className?: string }>;
 }> = [
-  { value: "light", label: "Light", description: "Bright canvas, day-shift comfort.", Icon: Sun },
-  { value: "system", label: "System", description: "Follow the OS preference.", Icon: Monitor },
-  { value: "dark", label: "Dark", description: "Reduced glare for long sessions.", Icon: Moon },
+  { value: "light", Icon: Sun },
+  { value: "system", Icon: Monitor },
+  { value: "dark", Icon: Moon },
 ];
 
 export function AppearanceSettings() {
+  const { t } = useTranslation("common");
+  const { language, languages, changeLanguage } = useLanguageSwitcher();
   const {
     mode, setMode,
     font, setFont,
@@ -62,17 +64,42 @@ export function AppearanceSettings() {
 
   return (
     <div className="space-y-6 fsh-enter">
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("settings.appearance.languageTitle")}</CardTitle>
+          <CardDescription>{t("settings.appearance.languageDescription")}</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-3 px-6 pb-5 pt-1 sm:grid-cols-2">
+          {languages.map((item) => (
+            <SwatchButton
+              key={item.code}
+              active={language === item.code}
+              onClick={() => void changeLanguage(item.code as Language)}
+              aria-pressed={language === item.code}
+              aria-label={item.englishLabel}
+            >
+              <div className="flex items-center justify-between">
+                <SwatchTitle active={language === item.code}>{item.nativeLabel}</SwatchTitle>
+                {language === item.code && <ActiveTag />}
+              </div>
+              <SwatchSubtitle>{item.englishLabel}</SwatchSubtitle>
+            </SwatchButton>
+          ))}
+        </CardContent>
+      </Card>
+
       {/* Theme */}
       <Card>
         <CardHeader>
-          <CardTitle>Theme</CardTitle>
+          <CardTitle>{t("settings.appearance.themeTitle")}</CardTitle>
           <CardDescription>
-            Pick a colour mode for the dashboard. System follows your OS.
+            {t("settings.appearance.dashboardThemeDescription")}
           </CardDescription>
         </CardHeader>
         <CardContent className="grid gap-3 px-6 pb-5 pt-1 sm:grid-cols-3">
-          {themeOptions.map(({ value, label, description, Icon }) => {
+          {themeOptions.map(({ value, Icon }) => {
             const active = mode === value;
+            const label = t(`theme.${value}`);
             return (
               <SwatchButton
                 key={value}
@@ -93,7 +120,7 @@ export function AppearanceSettings() {
                   {active && <ActiveTag />}
                 </div>
                 <SwatchTitle active={active}>{label}</SwatchTitle>
-                <SwatchSubtitle>{description}</SwatchSubtitle>
+                <SwatchSubtitle>{t(`settings.appearance.${value}Blurb`)}</SwatchSubtitle>
               </SwatchButton>
             );
           })}

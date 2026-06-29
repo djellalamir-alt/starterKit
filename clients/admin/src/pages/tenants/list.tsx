@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { Building2, ChevronLeft, ChevronRight, Plus } from "lucide-react";
@@ -6,7 +7,7 @@ import { listTenants, type TenantDto } from "@/api/tenants";
 import { Button } from "@/components/ui/button";
 import { Monogram } from "@/components/monogram";
 import { EntityPageHeader, ErrorBand } from "@/components/list";
-import { ApiRequestError } from "@/lib/api-client";
+import { formatDate, localizeApiError } from "@shared/i18n";
 import { cn } from "@/lib/cn";
 import { CreateTenantDialog } from "@/components/tenants/create-tenant-dialog";
 import { useAuth } from "@/auth/use-auth";
@@ -17,12 +18,8 @@ const PAGE_SIZE = 12;
 // Desktop grid template — shared by header + rows.
 const DESKTOP_COLS = "grid-cols-[1fr_140px_24px] lg:grid-cols-[1.6fr_1.4fr_140px_24px]";
 
-function formatDate(value: string): string {
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString();
-}
-
 export function TenantsListPage() {
+  const { t } = useTranslation(["errors"]);
   const [pageNumber, setPageNumber] = useState(1);
   const [createOpen, setCreateOpen] = useState(false);
   const navigate = useNavigate();
@@ -72,13 +69,7 @@ export function TenantsListPage() {
       </EntityPageHeader>
 
       {query.isError && (
-        <ErrorBand
-          message={
-            query.error instanceof ApiRequestError
-              ? query.error.problem?.detail ?? query.error.message
-              : "Failed to load tenants."
-          }
-        />
+        <ErrorBand message={localizeApiError(query.error, t)} />
       )}
 
       {query.isLoading && items.length === 0 && (
@@ -207,7 +198,7 @@ function TenantMobileCard({ tenant, onClick }: { tenant: TenantDto; onClick: () 
         onClick={onClick}
         aria-label={`Open tenant ${tenant.name}`}
         className={cn(
-          "group w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 text-left shadow-xs",
+          "group w-full overflow-hidden rounded-xl border border-[var(--color-border)] bg-[var(--color-card)] p-4 text-start shadow-xs",
           "transition-colors hover:border-[var(--color-border-strong)] hover:bg-[var(--color-accent)]",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]",
           !tenant.isActive && "opacity-75",
@@ -227,7 +218,7 @@ function TenantMobileCard({ tenant, onClick }: { tenant: TenantDto; onClick: () 
           </div>
           <ChevronRight className="size-4 shrink-0 text-[var(--color-border)] transition-colors group-hover:text-[var(--color-muted-foreground)]" />
         </div>
-        <div className="mt-2 ml-[52px] flex flex-wrap items-center gap-2">
+        <div className="mt-2 ms-[52px] flex flex-wrap items-center gap-2">
           <StatusPill active={tenant.isActive} />
           <span className="truncate font-mono text-[11px] text-[var(--color-muted-foreground)]">
             {tenant.adminEmail}
@@ -247,7 +238,7 @@ function TenantDesktopRow({ tenant, onClick }: { tenant: TenantDto; onClick: () 
         type="button"
         onClick={onClick}
         className={cn(
-          `group grid w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-[var(--color-accent)] focus-visible:bg-[var(--color-accent)] focus-visible:outline-none ${DESKTOP_COLS}`,
+          `group grid w-full items-center gap-3 px-4 py-3.5 text-start transition-colors hover:bg-[var(--color-accent)] focus-visible:bg-[var(--color-accent)] focus-visible:outline-none ${DESKTOP_COLS}`,
           !tenant.isActive && "opacity-75",
         )}
       >

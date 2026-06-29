@@ -1,32 +1,25 @@
 import { ApiRequestError } from "@/lib/api-client";
-
-const dateLong = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "2-digit",
-  year: "numeric",
-});
+import { formatCurrency, formatDate as formatLocalizedDate } from "@shared/i18n";
 
 export function formatDate(iso: string | null | undefined) {
   if (!iso) return "—";
-  return dateLong.format(new Date(iso));
+  return formatLocalizedDate(iso, {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  });
 }
 
 // "APR 30 2026" — mono-caps tabular form for ledger/registry rows.
 export function formatDateMono(iso: string | null | undefined) {
   if (!iso) return "—";
-  return dateLong.format(new Date(iso)).toUpperCase().replace(",", "");
+  return formatDate(iso).toUpperCase().replace(",", "");
 }
-
-// "3:42 PM" — local wall-clock time. Intl renders in the browser's timezone.
-const timeShort = new Intl.DateTimeFormat("en-US", {
-  hour: "numeric",
-  minute: "2-digit",
-});
 
 // "APR 30 2026 · 3:42 PM" — date + local time for audit/detail panels.
 export function formatDateTimeMono(iso: string | null | undefined) {
   if (!iso) return "—";
-  return `${formatDateMono(iso)} · ${timeShort.format(new Date(iso))}`;
+  return `${formatDateMono(iso)} · ${formatLocalizedDate(iso, { hour: "numeric", minute: "2-digit" })}`;
 }
 
 // "3d ago", "2mo ago" — terse relative time for the secondary line.
@@ -63,10 +56,7 @@ export function slugify(value: string) {
 
 export function formatMoney(amount: number, currency: string) {
   try {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency,
-    }).format(amount);
+    return formatCurrency(amount, currency);
   } catch {
     return `${amount.toFixed(2)} ${currency}`;
   }

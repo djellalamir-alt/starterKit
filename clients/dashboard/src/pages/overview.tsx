@@ -21,6 +21,7 @@ import {
   X,
   Zap,
 } from "lucide-react";
+import { formatDate, formatNumber } from "@shared/i18n";
 import {
   getMyStatus,
   getMySubscription,
@@ -57,9 +58,6 @@ type UsageRowVm = {
   overage: number;
   utilization: number;
 };
-
-const numberFmt = new Intl.NumberFormat("en-US");
-const formatNumber = (n: number) => numberFmt.format(n);
 
 function toUsageRows(snapshots: UsageSnapshotDto[]): UsageRowVm[] {
   const now = new Date();
@@ -163,14 +161,13 @@ function validityView(status: TenantStatusDto | undefined): {
   };
 }
 
-const timeFmt = new Intl.DateTimeFormat("en-US", {
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-  hour12: false,
-});
 function formatClock(ts: number) {
-  return timeFmt.format(new Date(ts));
+  return formatDate(ts, {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  });
 }
 
 function eventTone(type: string): "default" | "success" | "warning" | "danger" | "brand" {
@@ -429,14 +426,14 @@ function SubscriptionBody({
         <div className="flex items-center justify-between gap-3">
           <dt className="text-muted-foreground">Started</dt>
           <dd className="tabular-nums text-foreground">
-            {new Date(data.startUtc).toLocaleDateString("en-US", dateFmt)}
+            {formatDate(data.startUtc, dateFmt)}
           </dd>
         </div>
         <div className="flex items-center justify-between gap-3">
           <dt className="text-muted-foreground">Ends</dt>
           <dd className="tabular-nums text-foreground">
             {data.endUtc
-              ? new Date(data.endUtc).toLocaleDateString("en-US", dateFmt)
+              ? formatDate(data.endUtc, dateFmt)
               : "open-ended"}
           </dd>
         </div>
@@ -1005,7 +1002,7 @@ export function OverviewPage() {
 
   // ── Header strings ────────────────────────────────────────────────────
   const now = new Date();
-  const dateCaption = now.toLocaleDateString("en-US", {
+  const dateCaption = formatDate(now, {
     weekday: "long",
     day: "2-digit",
     month: "short",
@@ -1069,10 +1066,10 @@ export function OverviewPage() {
         ? "Contact your operator to renew"
         : validity.state === "InGrace"
           ? validity.targetUtc
-            ? `grace ends ${new Date(validity.targetUtc).toLocaleDateString("en-US", validityDateFmt)}`
+            ? `grace ends ${formatDate(validity.targetUtc, validityDateFmt)}`
             : "in grace period"
           : validity.targetUtc
-            ? `until ${new Date(validity.targetUtc).toLocaleDateString("en-US", validityDateFmt)}`
+            ? `until ${formatDate(validity.targetUtc, validityDateFmt)}`
             : "no end date";
 
   const resourcesValue = usage.isLoading ? (

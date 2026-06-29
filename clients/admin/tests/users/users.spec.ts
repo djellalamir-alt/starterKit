@@ -304,6 +304,8 @@ test.describe("user detail page", () => {
 
     await page.goto(`/users/${USER.id}`);
 
-    await expect(page.getByText(/User not found\./i)).toBeVisible({ timeout: 10_000 });
+    await expect(
+      page.getByText(/The requested resource was not found\./i),
+    ).toBeVisible({ timeout: 10_000 });
   });
 });

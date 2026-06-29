@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
+import { LanguageSwitcher } from "@shared/i18n";
 import { BrandMarkXL } from "@/components/brand-mark";
 import { cn } from "@/lib/cn";
 
@@ -44,6 +46,7 @@ export function AuthShell({
   /** Form area below the blurb. */
   children: ReactNode;
 }) {
+  const { t } = useTranslation("auth");
   return (
     <div className="grid min-h-screen bg-[var(--color-background)] text-[var(--color-foreground)] lg:grid-cols-[1.1fr_1fr]">
       {/* ─── Left pane — brand stage ───────────────────────────────── */}
@@ -60,22 +63,22 @@ export function AuthShell({
         <CornerTicks />
         <div className="relative flex flex-1 flex-col justify-between p-12 xl:p-16">
           <div className="meta text-[var(--color-muted-foreground)] fsh-enter">
-            // FSH / CONSOLE / RECOVER
+            {t("recovery.meta")}
           </div>
           <BrandMarkXL className="fsh-enter fsh-enter-2 max-w-lg" />
           <div className="fsh-enter fsh-enter-4 flex items-end justify-between gap-6">
             <div className="space-y-1">
-              <div className="meta text-[var(--color-muted-foreground)]">authorized personnel</div>
+              <div className="meta text-[var(--color-muted-foreground)]">{t("recovery.personnel")}</div>
               <div className="font-mono text-[12px] text-[var(--color-muted-foreground)] leading-relaxed">
-                Account recovery is rate-limited and audited.
+                {t("recovery.rateLimited")}
                 <br />
-                Reset links expire 30 minutes after issue.
+                {t("recovery.expires")}
               </div>
             </div>
-            <div className="meta text-right text-[var(--color-muted-foreground)]">
+            <div className="meta text-end text-[var(--color-muted-foreground)]">
               v0.1
               <br />
-              build · live
+              {t("recovery.buildLive")}
             </div>
           </div>
         </div>
@@ -89,6 +92,9 @@ export function AuthShell({
           {/* Mobile-only brand (lg+ uses the left pane). */}
           <div className="lg:hidden">
             <BrandMarkXL />
+            <div className="mt-4 flex justify-center">
+              <LanguageSwitcher triggerVariant="outline" />
+            </div>
           </div>
 
           <div className="space-y-3">

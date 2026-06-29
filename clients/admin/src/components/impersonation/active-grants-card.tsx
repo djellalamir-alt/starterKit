@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ShieldOff, UserCog } from "lucide-react";
+import { formatDate } from "@shared/i18n";
 import {
   listImpersonationGrants,
   type ImpersonationGrantDto,
@@ -147,8 +148,8 @@ function GrantRow({
           </Badge>
         </div>
         <div className="mt-0.5 truncate font-mono text-[10.5px] text-[var(--color-muted-foreground)]">
-          started {new Date(g.startedAtUtc).toLocaleTimeString()} · expires{" "}
-          {new Date(g.expiresAtUtc).toLocaleTimeString()}
+          started {formatDate(g.startedAtUtc, { hour: "numeric", minute: "2-digit" })} · expires{" "}
+          {formatDate(g.expiresAtUtc, { hour: "numeric", minute: "2-digit" })}
           {g.reason && <> · {truncate(g.reason, 80)}</>}
         </div>
       </div>
@@ -194,12 +195,12 @@ function RowActions({
           onClick={onReopen}
           title="Issue a fresh impersonation token — use when you lost the original dashboard tab."
         >
-          <UserCog className="mr-1 h-3.5 w-3.5" /> Re-open
+          <UserCog className="me-1 h-3.5 w-3.5" /> Re-open
         </Button>
       )}
       {canRevoke && (
         <Button variant="outline" size="sm" onClick={onRevoke}>
-          <ShieldOff className="mr-1 h-3.5 w-3.5" /> Revoke
+          <ShieldOff className="me-1 h-3.5 w-3.5" /> Revoke
         </Button>
       )}
     </div>

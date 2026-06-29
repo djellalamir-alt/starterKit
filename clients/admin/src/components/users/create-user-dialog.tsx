@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 import { KeyRound, User as UserIcon, Users } from "lucide-react";
 import { toast } from "sonner";
 import { registerUser } from "@/api/users";
@@ -18,7 +19,7 @@ import {
   DialogBody,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { describeError } from "@/lib/api-client";
+import { localizeApiError } from "@shared/i18n";
 
 // ─── Schema (identical to the old create page) ───────────────────────────────
 
@@ -84,6 +85,7 @@ export function CreateUserDialog({
 }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation(["errors"]);
 
   const {
     register,
@@ -124,7 +126,7 @@ export function CreateUserDialog({
       navigate(result.userId ? `/users/${result.userId}` : "/users");
     },
     onError: (err) => {
-      toast.error("Create failed", { description: describeError(err) });
+      toast.error("Create failed", { description: localizeApiError(err, t) });
     },
   });
 

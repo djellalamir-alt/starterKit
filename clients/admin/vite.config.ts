@@ -10,8 +10,22 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), tailwindcss()],
     resolve: {
+      // Aliases below that point at ./node_modules are required because
+      // ../shared/src is source-included (not a published package). Without
+      // them, bare imports from shared files walk upward past the app root
+      // and fail to resolve (or resolve to the wrong copy).
       alias: {
         "@": path.resolve(__dirname, "./src"),
+        "@shared": path.resolve(__dirname, "../shared/src"),
+        "lucide-react": path.resolve(__dirname, "./node_modules/lucide-react"),
+        i18next: path.resolve(__dirname, "./node_modules/i18next"),
+        "i18next-browser-languagedetector": path.resolve(
+          __dirname,
+          "./node_modules/i18next-browser-languagedetector",
+        ),
+        react: path.resolve(__dirname, "./node_modules/react"),
+        "react/jsx-runtime": path.resolve(__dirname, "./node_modules/react/jsx-runtime.js"),
+        "react-i18next": path.resolve(__dirname, "./node_modules/react-i18next"),
       },
     },
     server: {

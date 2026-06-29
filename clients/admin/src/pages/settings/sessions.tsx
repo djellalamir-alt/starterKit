@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import {
   AlertTriangle,
   LogOut,
@@ -18,10 +19,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ErrorBand, LoadingRow, SettingsSection } from "@/components/list";
-import { ApiRequestError } from "@/lib/api-client";
 import { cn } from "@/lib/cn";
+import { formatDate as formatLocalizedDate, localizeApiError } from "@shared/i18n";
 
 export function SessionsSettings() {
+  const { t } = useTranslation(["errors"]);
   const queryClient = useQueryClient();
   const query = useQuery({
     queryKey: ["identity", "sessions", "me"],
@@ -42,7 +44,7 @@ export function SessionsSettings() {
       toast.success("Session revoked");
       void queryClient.invalidateQueries({ queryKey: ["identity", "sessions", "me"] });
     },
-    onError: (err) => toast.error("Revoke failed", { description: describe(err) }),
+    onError: (err) => toast.error("Revoke failed", { description: localizeApiError(err, t) }),
     onSettled: (_d, _e, sessionId) =>
       setBusyIds((prev) => {
         const next = new Set(prev);
@@ -59,20 +61,12 @@ export function SessionsSettings() {
       );
       void queryClient.invalidateQueries({ queryKey: ["identity", "sessions", "me"] });
     },
-    onError: (err) => toast.error("Revoke all failed", { description: describe(err) }),
+    onError: (err) => toast.error("Revoke all failed", { description: localizeApiError(err, t) }),
   });
 
   if (query.isLoading) return <LoadingRow label="Loading sessions" />;
   if (query.isError) {
-    return (
-      <ErrorBand
-        message={
-          query.error instanceof ApiRequestError
-            ? (query.error.problem?.detail ?? query.error.message)
-            : "Failed to load sessions."
-        }
-      />
-    );
+    return <ErrorBand message={localizeApiError(query.error, t)} />;
   }
 
   return (
@@ -101,7 +95,7 @@ export function SessionsSettings() {
                 onClick={() => revokeAll.mutate()}
                 disabled={revokeAll.isPending}
               >
-                <LogOut className="mr-1.5 h-3.5 w-3.5" />
+                <LogOut className="me-1.5 h-3.5 w-3.5" />
                 {revokeAll.isPending ? "Signing out…" : "Sign out everywhere else"}
               </Button>
             </div>
@@ -184,7 +178,7 @@ function SessionRow({
         </span>
       ) : session.isActive ? (
         <Button variant="outline" size="sm" onClick={onRevoke} disabled={busy}>
-          <LogOut className="mr-1.5 h-3.5 w-3.5" />
+          <LogOut className="me-1.5 h-3.5 w-3.5" />
           {busy ? "Revoking…" : "Revoke"}
         </Button>
       ) : (
@@ -216,7 +210,9 @@ function describeDevice(s: UserSessionDto): string {
 function formatDate(value?: string | null): string {
   if (!value) return "—";
   const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? value : d.toLocaleString();
+  return Number.isNaN(d.getTime())
+    ? value
+    : formatLocalizedDate(d, { dateStyle: "medium", timeStyle: "short" });
 }
 
 function formatRelative(value?: string | null): string {
@@ -232,11 +228,5 @@ function formatRelative(value?: string | null): string {
   if (hr < 24) return `${hr}h ago`;
   const day = Math.round(hr / 24);
   if (day < 14) return `${day}d ago`;
-  return d.toLocaleDateString();
-}
-
-function describe(err: unknown): string {
-  if (err instanceof ApiRequestError) return err.problem?.detail ?? err.problem?.title ?? err.message;
-  if (err instanceof Error) return err.message;
-  return String(err);
+  return formatLocalizedDate(d);
 }

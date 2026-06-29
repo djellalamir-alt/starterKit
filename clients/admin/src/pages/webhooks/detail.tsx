@@ -34,12 +34,14 @@ import {
   Pagination,
   SettingsSection,
 } from "@/components/list";
-import { ApiRequestError } from "@/lib/api-client";
+import { formatDate as formatLocalizedDate, localizeApiError } from "@shared/i18n";
 import { cn } from "@/lib/cn";
+import { useTranslation } from "react-i18next";
 
 const PAGE_SIZE = 25;
 
 export function WebhookDetailPage() {
+  const { t } = useTranslation(["errors"]);
   const { id = "" } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -70,7 +72,7 @@ export function WebhookDetailPage() {
       );
       deliveries.refetch();
     },
-    onError: (err) => toast.error("Test failed", { description: describe(err) }),
+    onError: (err) => toast.error("Test failed", { description: localizeApiError(err, t) }),
   });
 
   const remove = useMutation({
@@ -80,7 +82,7 @@ export function WebhookDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["webhooks", "subscriptions"] });
       navigate("/webhooks");
     },
-    onError: (err) => toast.error("Delete failed", { description: describe(err) }),
+    onError: (err) => toast.error("Delete failed", { description: localizeApiError(err, t) }),
   });
 
   return (
@@ -92,19 +94,13 @@ export function WebhookDetailPage() {
         description={sub ? `Subscribed to ${sub.events.length} ${sub.events.length === 1 ? "event" : "events"}.` : "Loading subscription…"}
         actions={
           <Button variant="ghost" size="sm" onClick={() => navigate("/webhooks")}>
-            <ArrowLeft className="mr-1 h-3.5 w-3.5" /> Subscriptions
+            <ArrowLeft className="me-1 h-3.5 w-3.5" /> Subscriptions
           </Button>
         }
       />
 
       {subsQuery.isError && (
-        <ErrorBand
-          message={
-            subsQuery.error instanceof ApiRequestError
-              ? subsQuery.error.problem?.detail ?? subsQuery.error.message
-              : "Failed to load subscription."
-          }
-        />
+        <ErrorBand message={localizeApiError(subsQuery.error, t)} />
       )}
 
       {subsQuery.isLoading && <LoadingRow label="Loading subscription" />}
@@ -122,7 +118,7 @@ export function WebhookDetailPage() {
             footer={
               <div className="flex flex-wrap items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => test.mutate()} disabled={test.isPending}>
-                  <Send className="mr-1.5 h-3.5 w-3.5" />
+                  <Send className="me-1.5 h-3.5 w-3.5" />
                   {test.isPending ? "Sending…" : "Send test event"}
                 </Button>
                 <Button
@@ -136,7 +132,7 @@ export function WebhookDetailPage() {
                   disabled={remove.isPending}
                   className="text-[var(--color-destructive)] hover:bg-[oklch(from_var(--color-destructive)_l_c_h_/_0.08)]"
                 >
-                  <Trash2 className="mr-1.5 h-3.5 w-3.5" />
+                  <Trash2 className="me-1.5 h-3.5 w-3.5" />
                   {remove.isPending ? "Deleting…" : "Delete subscription"}
                 </Button>
               </div>
@@ -150,7 +146,7 @@ export function WebhookDetailPage() {
                 </Badge>
               } />
               <FieldRow label="Subscription id" mono value={sub.id} />
-              <FieldRow label="Created" mono value={new Date(sub.createdAtUtc).toLocaleString()} />
+              <FieldRow label="Created" mono value={formatLocalizedDate(sub.createdAtUtc, { dateStyle: "medium", timeStyle: "short" })} />
             </dl>
           </SettingsSection>
 
@@ -183,14 +179,14 @@ export function WebhookDetailPage() {
                   onClick={() => deliveries.refetch()}
                   disabled={deliveries.isFetching}
                 >
-                  <RefreshCw className={cn("mr-1.5 h-3.5 w-3.5", deliveries.isFetching && "animate-spin")} />
+                  <RefreshCw className={cn("me-1.5 h-3.5 w-3.5", deliveries.isFetching && "animate-spin")} />
                   Refresh
                 </Button>
               </div>
             }
           >
             {deliveries.isError ? (
-              <ErrorBand message={describe(deliveries.error)} />
+              <ErrorBand message={localizeApiError(deliveries.error, t)} />
             ) : deliveries.isLoading ? (
               <LoadingRow label="Loading deliveries" />
             ) : (deliveries.data?.items.length ?? 0) === 0 ? (
@@ -271,10 +267,4 @@ function formatTimestamp(value: string): string {
   if (Number.isNaN(d.getTime())) return value;
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-}
-
-function describe(err: unknown): string {
-  if (err instanceof ApiRequestError) return err.problem?.detail ?? err.problem?.title ?? err.message;
-  if (err instanceof Error) return err.message;
-  return String(err);
 }

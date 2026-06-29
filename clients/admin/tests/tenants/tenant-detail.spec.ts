@@ -143,8 +143,8 @@ test.describe("tenant detail header + provisioning", () => {
 
     await page.goto(`/tenants/${TENANT_ID}`);
 
-    await expect(page.getByText(/Tenant status is unavailable right now\./i)).toBeVisible({
-      timeout: 10_000,
-    });
+    await expect(
+      page.getByText(/The server could not complete the request\./i),
+    ).toBeVisible({ timeout: 10_000 });
   });
 });

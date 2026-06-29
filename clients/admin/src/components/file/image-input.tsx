@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useMutation } from "@tanstack/react-query";
 import { Image as ImageIcon, Loader2, Upload, X, Link as LinkIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -7,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/cn";
 import { useFileUpload, formatBytes } from "@/hooks/use-file-upload";
 import { getFileMetadata, Visibility } from "@/api/files";
-import { ApiRequestError } from "@/lib/api-client";
+import { localizeApiError } from "@shared/i18n";
 
 type Props = {
   /** Current image URL (or empty). The component is fully controlled. */
@@ -45,6 +46,7 @@ export function ImageInput({
   shape = "square",
   className,
 }: Props) {
+  const { t } = useTranslation(["errors"]);
   const [mode, setMode] = useState<"upload" | "url">("upload");
   const { upload, progress, isUploading, reset } = useFileUpload({
     ownerType,
@@ -81,13 +83,7 @@ export function ImageInput({
         // Clear progress so the dropzone re-arms for another upload.
         setTimeout(reset, 1500);
       } catch (e) {
-        const message =
-          e instanceof ApiRequestError
-            ? (e.problem?.detail ?? e.problem?.title ?? e.message)
-            : e instanceof Error
-              ? e.message
-              : "Upload failed";
-        toast.error(message);
+        toast.error(localizeApiError(e, t));
       }
     };
     input.click();

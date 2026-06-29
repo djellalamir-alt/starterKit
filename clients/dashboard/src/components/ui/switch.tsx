@@ -41,7 +41,7 @@ export const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
           className={cn(
             "pointer-events-none inline-block h-4 w-4 rounded-full bg-[var(--color-overlay-foreground)] shadow-[0_1px_2px_oklch(0_0_0_/_0.20)]",
             "transition-transform duration-[var(--duration-default)] ease-[var(--ease-out-cubic)]",
-            checked ? "translate-x-[18px]" : "translate-x-0.5",
+            checked ? "translate-x-[18px] rtl:-translate-x-[18px]" : "translate-x-0.5 rtl:-translate-x-0.5",
           )}
         />
       </button>

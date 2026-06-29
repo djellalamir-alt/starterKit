@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, Clock, X } from "lucide-react";
+import { formatDate } from "@shared/i18n";
 import { getMyStatus, type TenantStatusDto } from "@/api/billing";
 import { useAuth } from "@/auth/use-auth";
 import { cn } from "@/lib/cn";
@@ -21,12 +22,6 @@ type BannerView =
       kind: "nearing";
       daysLeft: number;
     };
-
-const dateFmt = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "2-digit",
-  year: "numeric",
-});
 
 /**
  * Whole calendar-ish days from `now` until `iso`, never negative. Uses a
@@ -49,7 +44,7 @@ function deriveBannerView(
       kind: "grace",
       daysLeft: daysUntil(status.graceEndsUtc, now),
       graceEndsLabel: status.graceEndsUtc
-        ? dateFmt.format(new Date(status.graceEndsUtc))
+        ? formatDate(status.graceEndsUtc, { month: "short", day: "2-digit", year: "numeric" })
         : "soon",
     };
   }

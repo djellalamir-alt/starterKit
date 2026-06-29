@@ -84,7 +84,7 @@ export const DialogContent = React.forwardRef<
           data-slot="dialog-close"
           aria-label="Close"
           className={cn(
-            "absolute top-3.5 right-3.5 size-9 rounded-lg flex items-center justify-center",
+            "absolute top-3.5 end-3.5 size-9 rounded-lg flex items-center justify-center",
             "text-[oklch(from_var(--color-muted-foreground)_l_c_h_/_0.6)] hover:text-[var(--color-foreground)]",
             "hover:bg-[var(--color-accent)] transition-colors cursor-pointer outline-none",
             "focus-visible:border-[var(--color-ring)] focus-visible:ring-[3px] focus-visible:ring-[oklch(from_var(--color-ring)_l_c_h_/_0.5)]",
@@ -102,7 +102,7 @@ DialogContent.displayName = "DialogContent";
 export function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("flex flex-col gap-1.5 px-6 pb-3 pt-6 text-left", className)}
+      className={cn("flex flex-col gap-1.5 px-6 pb-3 pt-6 text-start", className)}
       {...props}
     />
   );
@@ -158,8 +158,8 @@ export function DialogBody({ className, ...props }: React.HTMLAttributes<HTMLDiv
 type SheetSide = "left" | "right" | "top" | "bottom";
 
 const sheetSideClasses: Record<SheetSide, string> = {
-  left: "inset-y-0 left-0 h-full w-[min(20rem,85vw)] border-r data-[state=open]:animate-fsh-sheet-in-left data-[state=closed]:animate-fsh-sheet-out-left",
-  right: "inset-y-0 right-0 h-full w-[min(20rem,85vw)] border-l data-[state=open]:animate-fsh-sheet-in-right data-[state=closed]:animate-fsh-sheet-out-right",
+  left: "inset-y-0 left-0 h-full w-[min(20rem,85vw)] border-e data-[state=open]:animate-fsh-sheet-in-left data-[state=closed]:animate-fsh-sheet-out-left",
+  right: "inset-y-0 right-0 h-full w-[min(20rem,85vw)] border-s data-[state=open]:animate-fsh-sheet-in-right data-[state=closed]:animate-fsh-sheet-out-right",
   top: "inset-x-0 top-0 w-full max-h-[85vh] border-b data-[state=open]:animate-fsh-sheet-in-top data-[state=closed]:animate-fsh-sheet-out-top",
   bottom: "inset-x-0 bottom-0 w-full max-h-[85vh] border-t data-[state=open]:animate-fsh-sheet-in-bottom data-[state=closed]:animate-fsh-sheet-out-bottom",
 };
@@ -188,7 +188,7 @@ export const SheetContent = React.forwardRef<
         <DialogPrimitive.Close
           aria-label="Close"
           className={cn(
-            "absolute right-3 top-3 grid h-7 w-7 place-items-center rounded-md",
+            "absolute end-3 top-3 grid h-7 w-7 place-items-center rounded-md",
             "text-[var(--color-muted-foreground)] transition-colors",
             "hover:bg-[var(--color-accent)] hover:text-[var(--color-foreground)]",
             "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]",

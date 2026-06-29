@@ -1,7 +1,9 @@
 import { useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { Receipt } from "lucide-react";
+import { formatCurrency, localizeApiError } from "@shared/i18n";
 import {
   getMyInvoices,
   type InvoiceDto,
@@ -34,10 +36,7 @@ const PAGE_SIZE = 20;
 
 function formatMoney(amount: number, currency: string) {
   try {
-    return new Intl.NumberFormat(undefined, {
-      style: "currency",
-      currency,
-    }).format(amount);
+    return formatCurrency(amount, currency);
   } catch {
     return `${amount.toFixed(2)} ${currency}`;
   }
@@ -69,6 +68,7 @@ const DESKTOP_GRID =
 // ────────────────────────────────────────────────────────────────────
 
 export function InvoicesPage() {
+  const { t } = useTranslation(["errors"]);
   const { user } = useAuth();
   const [pageNumber, setPageNumber] = useState(1);
   const query = useQuery({
@@ -113,7 +113,7 @@ export function InvoicesPage() {
 
   const errorMessage =
     query.error instanceof ApiRequestError
-      ? query.error.problem?.detail ?? query.error.message
+      ? localizeApiError(query.error, t)
       : query.error
         ? "Failed to load invoices."
         : null;

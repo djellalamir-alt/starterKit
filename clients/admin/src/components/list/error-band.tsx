@@ -18,7 +18,7 @@ export function ErrorBand({ message, kind = "failure" }: ErrorBandProps) {
     >
       <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
       <div className="min-w-0">
-        <span className="meta mr-2 text-[var(--color-destructive)]">{kind} ·</span>
+        <span className="meta me-2 text-[var(--color-destructive)]">{kind} ·</span>
         <span className="text-[var(--color-destructive)]">{message}</span>
       </div>
     </div>

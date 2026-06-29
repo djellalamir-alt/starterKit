@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, keepPreviousData } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, ArrowRight, Check, Search, ShieldAlert, UserCog } from "lucide-react";
 import { toast } from "sonner";
+import { localizeApiError } from "@shared/i18n";
 import { searchUsers, type UserDto } from "@/api/users";
 import { startImpersonation, type ImpersonationResponse } from "@/api/impersonation";
 import { Button } from "@/components/ui/button";
@@ -17,7 +19,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Monogram } from "@/components/monogram";
-import { ApiRequestError } from "@/lib/api-client";
 import { env } from "@/env";
 import { cn } from "@/lib/cn";
 
@@ -130,6 +131,7 @@ function PickStep({
   onPick: (user: UserDto) => void;
   onCancel: () => void;
 }) {
+  const { t } = useTranslation(["errors"]);
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
 
@@ -173,9 +175,7 @@ function PickStep({
         <div className="-mx-2 max-h-[22rem] overflow-y-auto">
           {query.isError && (
             <div className="px-3 py-6 text-sm text-[var(--color-destructive)]">
-              {query.error instanceof ApiRequestError
-                ? query.error.problem?.detail ?? query.error.message
-                : "Failed to load users."}
+              {localizeApiError(query.error, t)}
             </div>
           )}
 
@@ -198,7 +198,7 @@ function PickStep({
                 <button
                   type="button"
                   onClick={() => onPick(user)}
-                  className="group flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-[var(--color-muted)]/60 focus:outline-none focus-visible:bg-[var(--color-muted)]/60"
+                  className="group flex w-full items-center gap-3 px-3 py-2.5 text-start transition-colors hover:bg-[var(--color-muted)]/60 focus:outline-none focus-visible:bg-[var(--color-muted)]/60"
                 >
                   <Monogram
                     seed={user.id ?? user.userName ?? "x"}
@@ -257,6 +257,7 @@ function ConfigureStep({
   onBack?: () => void;
   onDone: () => void;
 }) {
+  const { t } = useTranslation(["errors"]);
   const [reason, setReason] = useState("");
   const [minutes, setMinutes] = useState<number>(15);
 
@@ -279,11 +280,7 @@ function ConfigureStep({
       onDone();
     },
     onError: (err) => {
-      const detail =
-        err instanceof ApiRequestError
-          ? err.problem?.detail ?? err.problem?.title ?? err.message
-          : err.message;
-      toast.error("Impersonation failed", { description: detail });
+      toast.error("Impersonation failed", { description: localizeApiError(err, t) });
     },
   });
 
@@ -373,8 +370,8 @@ function ConfigureStep({
 
       <DialogFooter>
         {onBack && (
-          <Button variant="outline" onClick={onBack} disabled={mutation.isPending} className="sm:mr-auto">
-            <ArrowLeft className="mr-1 h-3.5 w-3.5" /> Choose another user
+          <Button variant="outline" onClick={onBack} disabled={mutation.isPending} className="sm:me-auto">
+            <ArrowLeft className="me-1 h-3.5 w-3.5" /> Choose another user
           </Button>
         )}
         <Button
@@ -386,7 +383,7 @@ function ConfigureStep({
             "Issuing token…"
           ) : (
             <>
-              <Check className="mr-1 h-3.5 w-3.5" /> Start {minutes}-min impersonation
+              <Check className="me-1 h-3.5 w-3.5" /> Start {minutes}-min impersonation
             </>
           )}
         </Button>

@@ -1,0 +1,121 @@
+{
+  "app": {
+    "name": "fullstackhero",
+    "admin": "الإدارة",
+    "dashboard": "لوحة التحكم",
+    "starterKit": "قالب ‎.NET 10 Starter Kit",
+    "versionAdmin": "الإصدار 0.1 · الإدارة",
+    "versionDashboard": "الإصدار 0.1 · لوحة التحكم"
+  },
+  "actions": {
+    "cancel": "إلغاء",
+    "apply": "تطبيق",
+    "save": "حفظ",
+    "close": "إغلاق",
+    "signOut": "تسجيل الخروج",
+    "search": "بحث",
+    "reset": "إعادة تعيين"
+  },
+  "theme": {
+    "label": "السمة",
+    "light": "فاتح",
+    "dark": "داكن",
+    "system": "النظام",
+    "active": "مفعّل"
+  },
+  "language": {
+    "label": "اللغة",
+    "switcherLabel": "تغيير اللغة",
+    "current": "اللغة الحالية: {{language}}",
+    "english": "English",
+    "arabic": "العربية"
+  },
+  "account": {
+    "label": "الحساب",
+    "profile": "الملف الشخصي",
+    "settings": "الإعدادات",
+    "apiKeys": "مفاتيح API",
+    "unknownUser": "غير معروف"
+  },
+  "status": {
+    "connectedEvents_zero": "متصل · لا توجد أحداث",
+    "connectedEvents_one": "متصل · حدث واحد",
+    "connectedEvents_two": "متصل · حدثان",
+    "connectedEvents_few": "متصل · {{formattedCount}} أحداث",
+    "connectedEvents_many": "متصل · {{formattedCount}} حدثًا",
+    "connectedEvents_other": "متصل · {{formattedCount}} حدث",
+    "streamOffline": "البث غير متصل",
+    "connecting": "جارٍ الاتصال…",
+    "reconnecting": "جارٍ إعادة الاتصال…",
+    "idle": "خامل"
+  },
+  "dialogs": {
+    "signOutTitle": "هل تريد تسجيل الخروج من fullstackhero؟",
+    "signOutAdminDescription": "ستحتاج إلى تسجيل الدخول مرة أخرى للوصول إلى لوحة الإدارة. سيتم فقدان أي عمل غير محفوظ في هذه الجلسة.",
+    "signOutDashboardDescription": "ستحتاج إلى تسجيل الدخول مرة أخرى للوصول إلى مساحة المستأجر. سيتم فقدان أي عمل غير محفوظ في هذه الجلسة."
+  },
+  "navigation": {
+    "adminProduct": "الإدارة",
+    "dashboardProduct": "لوحة التحكم",
+    "primary": "التنقل الرئيسي",
+    "primaryShort": "رئيسي",
+    "adminDescription": "أقسام الإدارة وروابط الحساب.",
+    "dashboardDescription": "أقسام الموقع وروابط الحساب.",
+    "openMenu": "فتح قائمة التنقل",
+    "collapseSidebar": "طي الشريط الجانبي",
+    "expandSidebar": "توسيع الشريط الجانبي",
+    "openProfileMenu": "فتح قائمة الملف الشخصي",
+    "openCommandPalette": "فتح لوحة الأوامر"
+  },
+  "settings": {
+    "profile": {
+      "loading": "جارٍ تحميل الملف الشخصي",
+      "accountFallback": "الحساب",
+      "profileSaved": "تم حفظ الملف الشخصي",
+      "saveFailed": "فشل الحفظ",
+      "imageUpdated": "تم تحديث صورة الملف الشخصي",
+      "loadWarning": "تعذر تحميل ملفك الشخصي. يتم عرض التفاصيل من جلستك؛ قد لا تعكس التغييرات المحفوظة أحدث حالة على الخادم.",
+      "avatarTitle": "الصورة الرمزية",
+      "photoTitle": "الصورة",
+      "avatarDescription": "تظهر في الشريط العلوي وعلى نشاطك. تعمل القصات المربعة بشكل أفضل — JPG أو PNG أو WebP.",
+      "identityTitle": "الهوية",
+      "adminIdentityDescription": "تفاصيل حسابك. يديرها مسؤول؛ تواصل معه إذا احتجت إلى تغييرات.",
+      "dashboardIdentityDescription": "اسمك وبيانات الاتصال بك، وتظهر عبر لوحة التحكم.",
+      "username": "اسم المستخدم",
+      "displayName": "اسم العرض",
+      "firstName": "الاسم الأول",
+      "lastName": "اسم العائلة",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "addressVerified": "العنوان مؤكد",
+      "notYetVerified": "لم يتم التأكيد بعد",
+      "emailChangeHelp": "تواصل مع مسؤول المستأجر لتغيير بريد تسجيل الدخول.",
+      "reset": "إعادة تعيين",
+      "saving": "جارٍ الحفظ…",
+      "saveChanges": "حفظ التغييرات",
+      "accountStatusTitle": "حالة الحساب",
+      "accountStatusDescription": "علامات التشغيل لهذا الحساب. تواصل مع مشغل لتغييرها.",
+      "active": "نشط",
+      "disabled": "معطل",
+      "emailConfirmed": "البريد مؤكد",
+      "emailPending": "البريد قيد الانتظار",
+      "twoFactorEnabled": "المصادقة الثنائية مفعلة",
+      "twoFactorOff": "المصادقة الثنائية متوقفة",
+      "subjectIdentifierTitle": "معرّف الحساب",
+      "subjectIdentifierDescription": "المعرّف الفريد الذي يستخدمه هذا الحساب داخل المنصة. للقراءة فقط."
+    },
+    "appearance": {
+      "languageTitle": "اللغة",
+      "languageDescription": "اختر اللغة واتجاه القراءة المستخدمين في هذا التطبيق.",
+      "themeTitle": "السمة",
+      "adminThemeDescription": "تبدو وحدة التحكم جيدة في الوضعين؛ صُممت لغة الواجهة حول أسطح محايدة ونبرة تمييز واحدة تظهر بوضوح في كلتا السمتين.",
+      "dashboardThemeDescription": "اختر وضع الألوان للوحة التحكم. خيار النظام يتبع تفضيل نظام التشغيل.",
+      "densityTitle": "الكثافة",
+      "adminDensityDescription": "سيقلل الوضع المدمج حشو البطاقات وارتفاع الصفوف للشاشات كثيفة البيانات، بشكل مشابه لخيار الكثافة في لوحة التحكم.",
+      "compactComingSoon": "صفوف مدمجة · قريبًا",
+      "lightBlurb": "أسطح بيضاء مريحة ومظهر واضح.",
+      "darkBlurb": "الوضع الافتراضي لوحدة التحكم. وهج أقل للجلسات الطويلة.",
+      "systemBlurb": "اتبع تفضيل نظام التشغيل."
+    }
+  }
+}

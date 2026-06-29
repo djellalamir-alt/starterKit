@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
 import { AlertCircle, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
+import { DirectionalIcon, localizeApiError, useDirection } from "@shared/i18n";
 import { Button } from "@/components/ui/button";
 import { confirmEmail } from "@/api/users";
-import { ApiRequestError } from "@/lib/api-client";
+import { cn } from "@/lib/cn";
 
 type Status =
   | { kind: "loading" }
@@ -19,6 +21,8 @@ type Status =
  * as the login and other auth pages.
  */
 export function ConfirmEmailPage() {
+  const { t } = useTranslation(["auth", "common"]);
+  const { isRtl } = useDirection();
   const [params] = useSearchParams();
   const userId = params.get("userId") ?? "";
   const code = params.get("code") ?? "";
@@ -31,8 +35,7 @@ export function ConfirmEmailPage() {
     if (malformed) {
       setStatus({
         kind: "error",
-        message:
-          "This confirmation link is missing required parameters. It may have been clipped by your email client.",
+        message: t("confirmEmail.malformedMessage"),
       });
       return;
     }
@@ -45,21 +48,17 @@ export function ConfirmEmailPage() {
           message:
             typeof message === "string" && message.length > 0
               ? message
-              : "Your email is confirmed. You can now sign in.",
+              : t("confirmEmail.defaultSuccessMessage"),
         });
       })
       .catch((err: unknown) => {
         if (cancelled) return;
-        const detail =
-          err instanceof ApiRequestError
-            ? err.problem?.detail ?? err.problem?.title ?? err.message
-            : (err as Error).message;
-        setStatus({ kind: "error", message: detail });
+        setStatus({ kind: "error", message: localizeApiError(err, t) });
       });
     return () => {
       cancelled = true;
     };
-  }, [userId, code, tenant, malformed]);
+  }, [userId, code, tenant, malformed, t]);
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--color-background)] px-5 py-8 sm:py-12">
@@ -95,7 +94,7 @@ export function ConfirmEmailPage() {
           </div>
           <div className="mt-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[oklch(from_var(--color-muted-foreground)_l_c_h_/_0.7)]">
             <span aria-hidden className="h-px w-6 bg-[var(--color-border)]" />
-            <span>.NET 10 Starter Kit</span>
+            <span>{t("common:app.starterKit")}</span>
             <span aria-hidden className="h-px w-6 bg-[var(--color-border)]" />
           </div>
         </div>
@@ -115,11 +114,11 @@ export function ConfirmEmailPage() {
                 </div>
                 <div>
                   <h1 className="mb-1.5 font-display text-[22px] font-semibold tracking-tight text-[var(--color-foreground)]">
-                    Verifying your{" "}
-                    <span className="text-[var(--color-primary)]">email…</span>
+                    {t("confirmEmail.verifyingLead")} {" "}
+                    <span className="text-[var(--color-primary)]">{t("confirmEmail.verifyingAccent")}</span>
                   </h1>
                   <p className="text-[13px] leading-relaxed text-[var(--color-muted-foreground)]">
-                    One moment — checking the confirmation token with the server.
+                    {t("confirmEmail.verifyingDescription")}
                   </p>
                 </div>
               </div>
@@ -137,8 +136,8 @@ export function ConfirmEmailPage() {
                 </div>
                 <div>
                   <h1 className="mb-1.5 font-display text-[22px] font-semibold tracking-tight text-[var(--color-foreground)]">
-                    Email{" "}
-                    <span className="text-[var(--color-primary)]">confirmed</span>
+                    {t("confirmEmail.successLead")} {" "}
+                    <span className="text-[var(--color-primary)]">{t("confirmEmail.successAccent")}</span>
                   </h1>
                   <p className="text-[13px] leading-relaxed text-[var(--color-muted-foreground)]">
                     {status.message}
@@ -146,8 +145,14 @@ export function ConfirmEmailPage() {
                 </div>
                 <Link to="/login" className="block">
                   <Button type="button" className="group h-11 w-full text-[14px] font-semibold">
-                    <span>Continue to sign in</span>
-                    <ArrowRight className="size-[14px] opacity-60 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100" />
+                    <span>{t("confirmEmail.continueToSignIn")}</span>
+                    <DirectionalIcon
+                      icon={ArrowRight}
+                      className={cn(
+                        "size-[14px] opacity-60 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100",
+                        isRtl && "group-hover:-translate-x-0.5",
+                      )}
+                    />
                   </Button>
                 </Link>
               </div>
@@ -165,27 +170,26 @@ export function ConfirmEmailPage() {
                 </div>
                 <div>
                   <h1 className="mb-1.5 font-display text-[22px] font-semibold tracking-tight text-[var(--color-foreground)]">
-                    Couldn't{" "}
-                    <span className="text-[var(--color-primary)]">confirm</span>{" "}
-                    your email
+                    {t("confirmEmail.errorLead")} {" "}
+                    <span className="text-[var(--color-primary)]">{t("confirmEmail.errorAccent")}</span>
+                    {t("confirmEmail.errorTrail")}
                   </h1>
                   <p className="text-[13px] leading-relaxed text-[var(--color-muted-foreground)]">
                     {status.message}
                   </p>
                   <p className="mt-2 text-[12px] leading-relaxed text-[var(--color-muted-foreground)]">
-                    The link may have expired or been used already. If you've signed in since
-                    this email was sent, you can ignore it.
+                    {t("confirmEmail.expiredHint")}
                   </p>
                 </div>
                 <div className="flex items-center justify-center gap-2 pt-1">
                   <Link to="/login">
                     <Button type="button" variant="outline">
-                      Back to sign in
+                      {t("confirmEmail.backToSignIn")}
                     </Button>
                   </Link>
                   <Link to="/forgot-password">
                     <Button type="button" variant="ghost">
-                      Reset password instead
+                      {t("confirmEmail.resetPasswordInstead")}
                     </Button>
                   </Link>
                 </div>
@@ -199,7 +203,7 @@ export function ConfirmEmailPage() {
             to="/login"
             className="text-[12.5px] text-[var(--color-muted-foreground)] underline-offset-4 hover:text-[var(--color-foreground)] hover:underline"
           >
-            ← Back to sign in
+            {isRtl ? "→" : "←"} {t("confirmEmail.backToSignIn")}
           </Link>
         </div>
       </div>

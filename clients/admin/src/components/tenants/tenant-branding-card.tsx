@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { Loader2, Palette, RotateCcw, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,7 +17,7 @@ import {
   type PaletteDto,
   type TenantThemeDto,
 } from "@/api/tenants";
-import { ApiRequestError } from "@/lib/api-client";
+import { localizeApiError } from "@shared/i18n";
 import { cn } from "@/lib/cn";
 
 /**
@@ -34,6 +35,8 @@ import { cn } from "@/lib/cn";
  */
 export function TenantBrandingCard({ tenantId }: { tenantId: string }) {
   const queryClient = useQueryClient();
+  const { t } = useTranslation(["errors"]);
+
 
   const themeQueryKey = useMemo(
     () => ["tenant", tenantId, "theme"] as const,
@@ -66,7 +69,7 @@ export function TenantBrandingCard({ tenantId }: { tenantId: string }) {
       void queryClient.invalidateQueries({ queryKey: themeQueryKey });
     },
     onError: (err) =>
-      toast.error("Save failed", { description: apiErr(err) }),
+      toast.error("Save failed", { description: localizeApiError(err, t) }),
   });
 
   const resetMutation = useMutation({
@@ -76,7 +79,7 @@ export function TenantBrandingCard({ tenantId }: { tenantId: string }) {
       void queryClient.invalidateQueries({ queryKey: themeQueryKey });
     },
     onError: (err) =>
-      toast.error("Reset failed", { description: apiErr(err) }),
+      toast.error("Reset failed", { description: localizeApiError(err, t) }),
   });
 
   if (themeQuery.isLoading) {
@@ -94,7 +97,7 @@ export function TenantBrandingCard({ tenantId }: { tenantId: string }) {
   if (themeQuery.isError) {
     return (
       <SettingsSection title="Branding" icon={Palette}>
-        <ErrorBand message={apiErr(themeQuery.error)} />
+        <ErrorBand message={localizeApiError(themeQuery.error, t)} />
       </SettingsSection>
     );
   }
@@ -133,7 +136,7 @@ export function TenantBrandingCard({ tenantId }: { tenantId: string }) {
           disabled={resetMutation.isPending || saveMutation.isPending}
           aria-label="Reset branding to defaults"
         >
-          <RotateCcw className="mr-1.5 h-3.5 w-3.5" />
+          <RotateCcw className="me-1.5 h-3.5 w-3.5" />
           {resetMutation.isPending ? "Resetting…" : "Reset to defaults"}
         </Button>
         <Button
@@ -143,9 +146,9 @@ export function TenantBrandingCard({ tenantId }: { tenantId: string }) {
           disabled={!dirty || saveMutation.isPending}
         >
           {saveMutation.isPending ? (
-            <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+            <Loader2 className="me-1.5 h-3.5 w-3.5 animate-spin" />
           ) : (
-            <Save className="mr-1.5 h-3.5 w-3.5" />
+            <Save className="me-1.5 h-3.5 w-3.5" />
           )}
           {saveMutation.isPending ? "Saving…" : "Save branding"}
         </Button>
@@ -478,10 +481,4 @@ function ThemePreview({ palette, label }: { palette: PaletteDto; label: string }
   );
 }
 
-function apiErr(err: unknown): string {
-  if (err instanceof ApiRequestError) {
-    return err.problem?.detail ?? err.problem?.title ?? err.message;
-  }
-  if (err instanceof Error) return err.message;
-  return "Unknown error";
-}
+

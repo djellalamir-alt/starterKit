@@ -33,7 +33,7 @@ export function ForbiddenView({ missing }: ForbiddenViewProps) {
         </p>
 
         {missing && missing.length > 0 && (
-          <div className="mt-5 space-y-1.5 border-l-2 border-[var(--color-accent-signal)] pl-3">
+          <div className="mt-5 space-y-1.5 border-s-2 border-[var(--color-accent-signal)] ps-3">
             <div className="meta text-[var(--color-muted-foreground)]">missing</div>
             <ul className="flex flex-wrap gap-1.5">
               {missing.map((p) => (
@@ -47,7 +47,7 @@ export function ForbiddenView({ missing }: ForbiddenViewProps) {
 
         <div className="mt-7 flex items-center gap-2">
           <Button asChild variant="outline" size="sm">
-            <Link to="/">← Overview</Link>
+            <Link to="/">Overview</Link>
           </Button>
         </div>
       </div>

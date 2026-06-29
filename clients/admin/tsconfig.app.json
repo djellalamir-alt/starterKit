@@ -19,9 +19,20 @@
     "noEmit": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@shared/*": ["../shared/src/*"],
+      // The ./node_modules mappings are required because ../shared/src is
+      // source-included. Without them TypeScript cannot resolve bare imports
+      // (react, i18next, lucide-react, ...) from shared files.
+      "i18next": ["./node_modules/i18next/index.d.ts"],
+      "i18next-browser-languagedetector": ["./node_modules/i18next-browser-languagedetector/index.d.ts"],
+      "lucide-react": ["./node_modules/lucide-react/dist/lucide-react.d.ts"],
+      "react": ["./node_modules/@types/react/index.d.ts"],
+      "react/jsx-runtime": ["./node_modules/@types/react/jsx-runtime.d.ts"],
+      "react/*": ["./node_modules/@types/react/*"],
+      "react-i18next": ["./node_modules/react-i18next/index.d.ts"]
     },
     "types": ["vite/client"]
   },
-  "include": ["src"]
+  "include": ["src", "../shared/src"]
 }

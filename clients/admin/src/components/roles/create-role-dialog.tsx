@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 import { Shield } from "lucide-react";
 import { toast } from "sonner";
 import { upsertRole, type RoleDto } from "@/api/roles";
@@ -18,7 +19,7 @@ import {
   DialogBody,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { ApiRequestError } from "@/lib/api-client";
+import { localizeApiError } from "@shared/i18n";
 
 // ─── Schema (identical to the old create page) ───────────────────────────────
 
@@ -44,6 +45,7 @@ export function CreateRoleDialog({
 }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { t } = useTranslation(["errors"]);
 
   const {
     register,
@@ -70,11 +72,7 @@ export function CreateRoleDialog({
       navigate(`/roles/${result.id}`);
     },
     onError: (err) => {
-      const detail =
-        err instanceof ApiRequestError
-          ? err.problem?.detail ?? err.problem?.title ?? err.message
-          : err.message;
-      toast.error("Create failed", { description: detail });
+      toast.error("Create failed", { description: localizeApiError(err, t) });
     },
   });
 

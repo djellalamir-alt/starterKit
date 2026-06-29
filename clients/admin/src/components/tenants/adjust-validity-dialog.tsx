@@ -1,10 +1,12 @@
 import { useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { CalendarCog } from "lucide-react";
 import { toast } from "sonner";
+import { formatDate as formatLocalizedDate, localizeApiError } from "@shared/i18n";
 import { adjustTenantValidity } from "@/api/tenants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,7 +20,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ApiRequestError } from "@/lib/api-client";
 
 // A `type="date"` input yields a `YYYY-MM-DD` string. zod validates the shape
 // and that it parses to a real calendar date.
@@ -31,16 +32,10 @@ const schema = z.object({
 
 type FormValues = z.infer<typeof schema>;
 
-function describe(err: unknown, fallback: string): string {
-  if (err instanceof ApiRequestError) return err.problem?.detail ?? err.problem?.title ?? err.message;
-  if (err instanceof Error) return err.message;
-  return fallback;
-}
-
 function formatDate(value?: string | null): string {
   if (!value) return "—";
   const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString();
+  return Number.isNaN(d.getTime()) ? value : formatLocalizedDate(d);
 }
 
 /** `YYYY-MM-DD` (the native date input value) for an ISO/date string, for prefill. */
@@ -67,6 +62,7 @@ export function AdjustValidityDialog({
   tenantId: string;
   validUpto?: string;
 }) {
+  const { t } = useTranslation(["errors"]);
   const queryClient = useQueryClient();
 
   const {
@@ -95,7 +91,7 @@ export function AdjustValidityDialog({
       queryClient.invalidateQueries({ queryKey: ["tenants"] });
       handleClose();
     },
-    onError: (err) => toast.error("Adjust failed", { description: describe(err, "Could not adjust validity.") }),
+    onError: (err) => toast.error("Adjust failed", { description: localizeApiError(err, t) }),
   });
 
   function handleClose() {

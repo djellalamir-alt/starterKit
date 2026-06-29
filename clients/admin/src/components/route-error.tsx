@@ -38,11 +38,11 @@ export function RouteError() {
         </p>
 
         {detail && (
-          <details className="group mx-auto w-full max-w-lg text-left">
+          <details className="group mx-auto w-full max-w-lg text-start">
             <summary className="meta cursor-pointer text-[var(--color-muted-foreground)] transition-colors hover:text-[var(--color-foreground)]">
               <span className="select-none">// stack trace · click to expand</span>
             </summary>
-            <pre className="mt-3 max-h-60 overflow-auto rounded-md border border-[var(--color-border)] bg-[var(--color-surface-2)] p-3 text-left font-mono text-[11px] leading-relaxed text-[var(--color-muted-foreground)] whitespace-pre-wrap">
+            <pre className="mt-3 max-h-60 overflow-auto rounded-md border border-[var(--color-border)] bg-[var(--color-surface-2)] p-3 text-start font-mono text-[11px] leading-relaxed text-[var(--color-muted-foreground)] whitespace-pre-wrap">
               {detail}
             </pre>
           </details>

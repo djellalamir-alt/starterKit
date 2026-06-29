@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   keepPreviousData,
   useMutation,
@@ -16,6 +17,7 @@ import {
   UserCog,
 } from "lucide-react";
 import { toast } from "sonner";
+import { localizeApiError } from "@shared/i18n";
 import {
   adminRevokeAllUserSessions,
   adminRevokeUserSessionById,
@@ -49,6 +51,7 @@ const DESKTOP_COLS = "grid-cols-[1.4fr_1.4fr_140px_140px_120px]";
 // ───────────────────────────────────────────────────────────────────────
 
 export function SessionsPage() {
+  const { t } = useTranslation(["errors"]);
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
@@ -103,11 +106,7 @@ export function SessionsPage() {
       void queryClient.invalidateQueries({ queryKey: ["identity", "sessions"] });
     },
     onError: (err) => {
-      toast.error(
-        err instanceof ApiRequestError
-          ? err.problem?.detail ?? err.message
-          : "Could not revoke session.",
-      );
+      toast.error(err instanceof ApiRequestError ? localizeApiError(err, t) : "Could not revoke session.");
     },
   });
 
@@ -120,11 +119,7 @@ export function SessionsPage() {
       void queryClient.invalidateQueries({ queryKey: ["identity", "sessions"] });
     },
     onError: (err) => {
-      toast.error(
-        err instanceof ApiRequestError
-          ? err.problem?.detail ?? err.message
-          : "Could not revoke sessions.",
-      );
+      toast.error(err instanceof ApiRequestError ? localizeApiError(err, t) : "Could not revoke sessions.");
     },
   });
 

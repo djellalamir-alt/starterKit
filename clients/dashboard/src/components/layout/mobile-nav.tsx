@@ -7,8 +7,10 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 import { Menu } from "lucide-react";
+import { useDirection } from "@shared/i18n";
 import {
   Sheet,
   SheetContent,
@@ -61,6 +63,8 @@ export function MobileNavProvider({ children }: { children: ReactNode }) {
  * or any non-NavLink navigation while the drawer is open).
  */
 export function MobileNavRoot() {
+  const { t } = useTranslation("common");
+  const { isRtl } = useDirection();
   const { open, setOpen } = useMobileNav();
   const location = useLocation();
 
@@ -84,12 +88,12 @@ export function MobileNavRoot() {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent side="left" className="flex flex-col p-0">
+      <SheetContent side={isRtl ? "right" : "left"} className="flex flex-col p-0">
         {/* Radix Dialog requires a Title for the accessible name; keep it
             visually hidden so the drawer chrome is unchanged. */}
-        <DialogTitle className="sr-only">Primary navigation</DialogTitle>
+        <DialogTitle className="sr-only">{t("navigation.primary")}</DialogTitle>
         <DialogDescription className="sr-only">
-          Site sections and account links.
+          {t("navigation.dashboardDescription")}
         </DialogDescription>
         {/* Brand row — matches Topbar height so the drawer top aligns
             with the rest of the chrome. */}
@@ -116,7 +120,7 @@ export function MobileNavRoot() {
 
         <div className="border-t border-[var(--color-border)] px-5 py-3">
           <p className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-[var(--color-muted-foreground)]">
-            v0.1 · dashboard
+            {t("app.versionDashboard")}
           </p>
         </div>
       </SheetContent>
@@ -129,12 +133,13 @@ export function MobileNavRoot() {
  * the first child so it sits at the leading edge on small screens).
  */
 export function MobileNavTrigger({ className }: { className?: string }) {
+  const { t } = useTranslation("common");
   const { setOpen } = useMobileNav();
   const onClick = useCallback(() => setOpen(true), [setOpen]);
   return (
     <button
       type="button"
-      aria-label="Open navigation menu"
+      aria-label={t("navigation.openMenu")}
       onClick={onClick}
       className={cn(
         "grid h-9 w-9 cursor-pointer place-items-center rounded-md md:hidden",

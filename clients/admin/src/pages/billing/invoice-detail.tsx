@@ -17,10 +17,11 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
 import { EntityPageHeader, SettingsSection, Field } from "@/components/list";
-import { ApiRequestError } from "@/lib/api-client";
 import { cn } from "@/lib/cn";
 import { useAuth } from "@/auth/use-auth";
 import { BillingPermissions } from "@/lib/permissions";
+import { localizeApiError } from "@shared/i18n";
+import { useTranslation } from "react-i18next";
 
 // ─── helpers ─────────────────────────────────────────────────────────
 
@@ -62,15 +63,10 @@ function statusVariant(status: InvoiceStatus): React.ComponentProps<typeof Badge
   }
 }
 
-function describe(err: unknown, fallback: string): string {
-  if (err instanceof ApiRequestError) return err.problem?.detail ?? err.problem?.title ?? err.message;
-  if (err instanceof Error) return err.message;
-  return fallback;
-}
-
 // ─── component ───────────────────────────────────────────────────────
 
 export function InvoiceDetailPage() {
+  const { t } = useTranslation(["errors"]);
   const { invoiceId = "" } = useParams<{ invoiceId: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -99,7 +95,7 @@ export function InvoiceDetailPage() {
   // could be stale if the query refetched between render and click.
   const downloadMutation = useMutation({
     mutationFn: ({ id, number }: { id: string; number: string }) => downloadInvoicePdf(id, number),
-    onError: (err) => toast.error("Download failed", { description: describe(err, "Could not download the invoice PDF.") }),
+    onError: (err) => toast.error("Download failed", { description: localizeApiError(err, t) }),
   });
 
   const issueMutation = useMutation({
@@ -109,7 +105,7 @@ export function InvoiceDetailPage() {
       setDueAt("");
       invalidate();
     },
-    onError: (err) => toast.error("Issue failed", { description: describe(err, "Could not issue invoice.") }),
+    onError: (err) => toast.error("Issue failed", { description: localizeApiError(err, t) }),
   });
 
   const payMutation = useMutation({
@@ -118,7 +114,7 @@ export function InvoiceDetailPage() {
       toast.success("Marked paid");
       invalidate();
     },
-    onError: (err) => toast.error("Mark-paid failed", { description: describe(err, "Could not mark paid.") }),
+    onError: (err) => toast.error("Mark-paid failed", { description: localizeApiError(err, t) }),
   });
 
   const voidMutation = useMutation({
@@ -128,7 +124,7 @@ export function InvoiceDetailPage() {
       setVoidReason("");
       invalidate();
     },
-    onError: (err) => toast.error("Void failed", { description: describe(err, "Could not void invoice.") }),
+    onError: (err) => toast.error("Void failed", { description: localizeApiError(err, t) }),
   });
 
   // ── render ─────────────────────────────────────────────────────────
@@ -147,7 +143,7 @@ export function InvoiceDetailPage() {
           </div>
         ) : query.isError ? (
           <div className="text-sm text-[var(--color-destructive)]">
-            {describe(query.error, "Failed to load invoice.")}
+            {localizeApiError(query.error, t)}
           </div>
         ) : invoice ? (
           <EntityPageHeader
@@ -216,7 +212,7 @@ export function InvoiceDetailPage() {
         >
           {query.isError ? (
             <div className="py-8 text-center text-sm text-[var(--color-destructive)]">
-              {describe(query.error, "Failed to load line items.")}
+              {localizeApiError(query.error, t)}
             </div>
           ) : query.isLoading ? (
             <ul className="-mx-5 divide-y divide-[var(--color-border)] border-t border-[var(--color-border)]">
@@ -391,7 +387,7 @@ function LineItemRow({
           {item.quantity.toLocaleString()} × {formatMoney(item.unitPrice, currency)}
         </div>
       </div>
-      <div className="text-right text-sm font-semibold tabular-nums">
+      <div className="text-end text-sm font-semibold tabular-nums">
         {formatMoney(item.amount, currency)}
       </div>
     </li>

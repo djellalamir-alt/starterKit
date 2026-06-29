@@ -1,0 +1,12 @@
+{
+  "generic": "Something went wrong. Try again.",
+  "server": "The server could not complete the request.",
+  "notFound": "The requested resource was not found.",
+  "unauthorized": "Your session has expired. Sign in again.",
+  "forbidden": "You do not have permission to perform this action.",
+  "rateLimited": "Too many requests. Try again shortly.",
+  "userNotFound": "User not found.",
+  "invalidCredentials": "Invalid credentials.",
+  "tenantNotFound": "Tenant not found.",
+  "validationFailed": "Review the highlighted fields and try again."
+}

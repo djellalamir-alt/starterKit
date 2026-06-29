@@ -11,9 +11,21 @@ test.beforeEach(async ({ page }) => {
   await installAdminShellMocks(page);
 });
 
+async function gotoAppearance(page: Parameters<typeof test.beforeEach>[0]["page"]) {
+  await page.goto("/settings/appearance");
+  await page.addStyleTag({
+    content: `
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    `,
+  });
+}
+
 test.describe("settings · appearance", () => {
   test("renders the Light and Dark theme options", async ({ page }) => {
-    await page.goto("/settings/appearance");
+    await gotoAppearance(page);
 
     const main = page.getByRole("main");
     // "Theme" prose appears in the section description AND the settings nav
@@ -27,7 +39,7 @@ test.describe("settings · appearance", () => {
   });
 
   test("selecting Dark applies dark mode and Light reverts it", async ({ page }) => {
-    await page.goto("/settings/appearance");
+    await gotoAppearance(page);
 
     const main = page.getByRole("main");
     const dark = main.getByRole("button", { name: /Dark/ });
@@ -46,7 +58,7 @@ test.describe("settings · appearance", () => {
   });
 
   test("persists the selected theme to localStorage", async ({ page }) => {
-    await page.goto("/settings/appearance");
+    await gotoAppearance(page);
 
     const main = page.getByRole("main");
     const light = main.getByRole("button", { name: /Light/ });
@@ -57,5 +69,19 @@ test.describe("settings · appearance", () => {
 
     const stored = await page.evaluate(() => localStorage.getItem("fsh.admin.theme"));
     expect(stored).toBe("light");
+  });
+
+  test("switches to Arabic and persists RTL document direction", async ({ page }) => {
+    await gotoAppearance(page);
+
+    const main = page.getByRole("main");
+    const arabic = main.getByRole("button", { name: /العربية/ });
+    await expect(arabic).toBeVisible({ timeout: 10_000 });
+
+    await arabic.click();
+    await expect(page.locator("html")).toHaveAttribute("lang", "ar");
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+    await expect(main.getByText("اللغة").first()).toBeVisible();
+    expect(await page.evaluate(() => localStorage.getItem("app-language"))).toBe("ar");
   });
 });

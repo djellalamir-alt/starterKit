@@ -38,6 +38,7 @@ import {
   type AdminUserSessionDto,
   type UserRoleDto,
 } from "@/api/identity";
+import { formatDate } from "@shared/i18n";
 import { useAuth } from "@/auth/use-auth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -744,13 +745,6 @@ function ProfileRow({
 //  Sessions card
 // ───────────────────────────────────────────────────────────────────────
 
-const sessionDateFmt = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-});
-
 function describeDevice(s: AdminUserSessionDto): string {
   const browser = s.browser ?? "Unknown browser";
   const version = s.browserVersion ? ` ${s.browserVersion}` : "";
@@ -863,10 +857,21 @@ function SessionsCard({
                     )}
                     <span className="inline-flex items-center gap-1">
                       <Clock className="h-3 w-3" /> last seen{" "}
-                      {sessionDateFmt.format(new Date(session.lastActivityAt))}
+                      {formatDate(session.lastActivityAt, {
+                        month: "short",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </span>
                     <span className="opacity-70">
-                      started {sessionDateFmt.format(new Date(session.createdAt))}
+                      started{" "}
+                      {formatDate(session.createdAt, {
+                        month: "short",
+                        day: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </span>
                   </div>
                 </div>
@@ -878,7 +883,7 @@ function SessionsCard({
                     disabled={isRevoking}
                     className="shrink-0 text-[var(--color-muted-foreground)] hover:text-[var(--color-destructive)]"
                   >
-                    <XCircle className="mr-1 h-3.5 w-3.5" />
+                    <XCircle className="me-1 h-3.5 w-3.5" />
                     {isRevoking ? "Revoking…" : "Revoke"}
                   </Button>
                 )}

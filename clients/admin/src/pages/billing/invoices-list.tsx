@@ -23,8 +23,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select } from "@/components/list";
 import { KpiTile } from "@/components/kpi-tile";
-import { ApiRequestError } from "@/lib/api-client";
 import { cn } from "@/lib/cn";
+import { localizeApiError } from "@shared/i18n";
+import { useTranslation } from "react-i18next";
 
 const PAGE_SIZE = 20;
 
@@ -71,15 +72,10 @@ function statusVariant(status: InvoiceStatus): React.ComponentProps<typeof Badge
   }
 }
 
-function describe(err: unknown): string {
-  if (err instanceof ApiRequestError) return err.problem?.detail ?? err.problem?.title ?? err.message;
-  if (err instanceof Error) return err.message;
-  return "Failed to load invoices.";
-}
-
 // ─── component ───────────────────────────────────────────────────────
 
 export function InvoicesListPage() {
+  const { t } = useTranslation(["errors"]);
   const navigate = useNavigate();
   const [pageNumber, setPageNumber] = useState(1);
 
@@ -275,7 +271,7 @@ export function InvoicesListPage() {
         <CardContent className="p-0">
           {query.isError && (
             <div className="border-t border-[var(--color-border)] px-6 py-4 text-sm text-[var(--color-destructive)]">
-              {describe(query.error)}
+              {localizeApiError(query.error, t)}
             </div>
           )}
 
@@ -305,7 +301,7 @@ export function InvoicesListPage() {
                     type="button"
                     onClick={() => navigate(`/billing/invoices/${inv.id}`)}
                     className={cn(
-                      "fsh-enter grid w-full grid-cols-[1fr_auto] items-center gap-x-6 gap-y-1 px-6 py-4 text-left transition-colors hover:bg-[var(--color-muted)] cursor-pointer",
+                      "fsh-enter grid w-full grid-cols-[1fr_auto] items-center gap-x-6 gap-y-1 px-6 py-4 text-start transition-colors hover:bg-[var(--color-muted)] cursor-pointer",
                     )}
                     style={{ animationDelay: `${Math.min(i, 8) * 25}ms` }}
                   >
@@ -354,7 +350,7 @@ export function InvoicesListPage() {
                   </div>
 
                   {/* Amount column */}
-                  <div className="text-right">
+                  <div className="text-end">
                     <div className="text-display text-base font-semibold tabular-nums">
                       {formatMoney(inv.subtotalAmount, inv.currency)}
                     </div>

@@ -8,6 +8,7 @@ import {
   Gauge,
   Receipt,
 } from "lucide-react";
+import { formatNumber } from "@shared/i18n";
 import {
   getMyInvoices,
   getMyStatus,
@@ -35,9 +36,6 @@ import { cn } from "@/lib/cn";
 // ────────────────────────────────────────────────────────────────────
 // Pure view helpers — module scope.
 // ────────────────────────────────────────────────────────────────────
-
-const numberFmt = new Intl.NumberFormat("en-US");
-const formatNumber = (n: number) => numberFmt.format(n);
 
 type UsageRowVm = {
   resource: string;

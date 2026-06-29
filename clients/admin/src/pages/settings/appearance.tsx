@@ -1,4 +1,6 @@
+import { useTranslation } from "react-i18next";
 import { Moon, Palette, Sun } from "lucide-react";
+import { useLanguageSwitcher, type Language } from "@shared/i18n";
 import { useTheme } from "@/components/theme/theme-provider";
 import { Button } from "@/components/ui/button";
 import { SettingsSection } from "@/components/list";
@@ -32,18 +34,56 @@ const MODES: {
  * to a tri-state. Persistence is handled by the provider; we just call setTheme.
  */
 export function AppearanceSettings() {
+  const { t } = useTranslation("common");
   const { theme, setTheme } = useTheme();
+  const { language, languages, changeLanguage } = useLanguageSwitcher();
 
   return (
     <div className="space-y-5 fsh-enter">
-      {/* Theme */}
       <SettingsSection
-        title="Theme"
+        title={t("settings.appearance.languageTitle")}
         icon={Palette}
-        description="Console looks good in both modes — the editorial-terminal language is built around tone-neutral surfaces with a single chartreuse accent that reads identically on either."
+        description={t("settings.appearance.languageDescription")}
       >
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          {MODES.map(({ value, label, icon: Icon, blurb }) => {
+          {languages.map((item) => {
+            const active = language === item.code;
+            return (
+              <button
+                key={item.code}
+                type="button"
+                onClick={() => void changeLanguage(item.code as Language)}
+                aria-pressed={active}
+                className={cn(
+                  "group/card relative flex flex-col items-start gap-1.5 overflow-hidden rounded-xl border p-4 text-start",
+                  "transition-colors duration-[var(--duration-default)]",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)] focus-visible:ring-offset-2",
+                  active
+                    ? "border-[var(--color-accent-signal)] bg-[oklch(from_var(--color-accent-signal)_l_c_h_/_0.08)]"
+                    : "border-[var(--color-border)] bg-[var(--color-card)] hover:bg-[var(--color-muted)]",
+                )}
+              >
+                <span className={cn("text-sm font-semibold tracking-tight", active && "text-[var(--color-accent-signal)]")}>{item.nativeLabel}</span>
+                <span className="text-xs text-[var(--color-muted-foreground)]">{item.englishLabel}</span>
+                {active && (
+                  <span className="mt-2 text-[10px] font-semibold uppercase tracking-wider text-[var(--color-accent-signal)]">
+                    {t("theme.active")}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </SettingsSection>
+
+      {/* Theme */}
+      <SettingsSection
+        title={t("settings.appearance.themeTitle")}
+        icon={Palette}
+        description={t("settings.appearance.adminThemeDescription")}
+      >
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {MODES.map(({ value, icon: Icon }) => {
             const active = theme === value;
             return (
               <button
@@ -52,7 +92,7 @@ export function AppearanceSettings() {
                 onClick={() => setTheme(value)}
                 aria-pressed={active}
                 className={cn(
-                  "group/card relative overflow-hidden flex flex-col items-start gap-2 rounded-xl border p-4 text-left",
+                  "group/card relative overflow-hidden flex flex-col items-start gap-2 rounded-xl border p-4 text-start",
                   "transition-colors duration-[var(--duration-default)]",
                   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)] focus-visible:ring-offset-2",
                   active
@@ -83,10 +123,10 @@ export function AppearanceSettings() {
                     active && "text-[var(--color-accent-signal)]",
                   )}
                 >
-                  {label}
+                  {t(`theme.${value}`)}
                 </span>
                 <span className="text-xs leading-relaxed text-[var(--color-muted-foreground)]">
-                  {blurb}
+                  {t(`settings.appearance.${value}Blurb`)}
                 </span>
               </button>
             );
@@ -96,12 +136,12 @@ export function AppearanceSettings() {
 
       {/* Density — placeholder for a future compact toggle */}
       <SettingsSection
-        title="Density"
+        title={t("settings.appearance.densityTitle")}
         icon={Palette}
-        description="Compact mode will reduce card padding and row height for data-dense screens — similar to the dashboard's density toggle."
+        description={t("settings.appearance.adminDensityDescription")}
       >
         <Button variant="outline" size="sm" disabled>
-          Compact rows · coming soon
+          {t("settings.appearance.compactComingSoon")}
         </Button>
       </SettingsSection>
     </div>

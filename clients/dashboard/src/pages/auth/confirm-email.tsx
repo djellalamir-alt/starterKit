@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router-dom";
 import { AlertCircle, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
+import { DirectionalIcon, localizeApiError, useDirection } from "@shared/i18n";
 import { Button } from "@/components/ui/button";
 import { AuthHeadline, AuthShell } from "@/components/auth/auth-shell";
 import { confirmEmail } from "@/api/identity";
-import { ApiRequestError } from "@/lib/api-client";
+import { cn } from "@/lib/cn";
 
 /**
  * Confirm-email landing — the link sent during registration brings the
@@ -24,6 +26,8 @@ type Status =
   | { kind: "error"; message: string };
 
 export function ConfirmEmailPage() {
+  const { t } = useTranslation("auth");
+  const { isRtl } = useDirection();
   const [params] = useSearchParams();
   const userId = params.get("userId") ?? "";
   const code = params.get("code") ?? "";
@@ -40,8 +44,7 @@ export function ConfirmEmailPage() {
     if (malformed) {
       setStatus({
         kind: "error",
-        message:
-          "This confirmation link is missing required parameters. It may have been clipped by your email client.",
+        message: t("confirmEmail.malformedMessage"),
       });
       return;
     }
@@ -55,22 +58,18 @@ export function ConfirmEmailPage() {
           message:
             typeof message === "string" && message.length > 0
               ? message
-              : "Your email is confirmed. You can now sign in.",
+              : t("confirmEmail.defaultSuccessMessage"),
         });
       })
       .catch((err: unknown) => {
         if (cancelled) return;
-        const detail =
-          err instanceof ApiRequestError
-            ? err.problem?.detail ?? err.problem?.title ?? err.message
-            : (err as Error).message;
-        setStatus({ kind: "error", message: detail });
+        setStatus({ kind: "error", message: localizeApiError(err, t) });
       });
 
     return () => {
       cancelled = true;
     };
-  }, [userId, code, tenant, malformed]);
+  }, [userId, code, tenant, malformed, t]);
 
   return (
     <AuthShell
@@ -79,7 +78,7 @@ export function ConfirmEmailPage() {
           to="/login"
           className="text-[var(--color-foreground)] underline-offset-4 hover:underline"
         >
-          ← Back to sign in
+          {isRtl ? "→" : "←"} {t("confirmEmail.backToSignIn")}
         </Link>
       }
     >
@@ -94,9 +93,9 @@ export function ConfirmEmailPage() {
             </span>
           </div>
           <div>
-            <AuthHeadline lead="Verifying your" accent="email…" />
+            <AuthHeadline lead={t("confirmEmail.verifyingLead")} accent={t("confirmEmail.verifyingAccent")} />
             <p className="text-[13px] leading-relaxed text-[var(--color-muted-foreground)]">
-              One moment — checking the confirmation token with the server.
+              {t("confirmEmail.verifyingDescription")}
             </p>
           </div>
         </div>
@@ -113,15 +112,21 @@ export function ConfirmEmailPage() {
             </span>
           </div>
           <div>
-            <AuthHeadline lead="Email" accent="confirmed" />
+            <AuthHeadline lead={t("confirmEmail.successLead")} accent={t("confirmEmail.successAccent")} />
             <p className="text-[13px] leading-relaxed text-[var(--color-muted-foreground)]">
               {status.message}
             </p>
           </div>
           <Link to="/login" className="block">
             <Button type="button" className="group h-11 w-full text-[14px] font-semibold">
-              <span>Continue to sign in</span>
-              <ArrowRight className="size-[14px] opacity-60 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100" />
+              <span>{t("confirmEmail.continueToSignIn")}</span>
+              <DirectionalIcon
+                icon={ArrowRight}
+                className={cn(
+                  "size-[14px] opacity-60 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100",
+                  isRtl && "group-hover:-translate-x-0.5",
+                )}
+              />
             </Button>
           </Link>
         </div>
@@ -138,24 +143,23 @@ export function ConfirmEmailPage() {
             </span>
           </div>
           <div>
-            <AuthHeadline lead="Couldn't" accent="confirm" trail=" your email" />
+            <AuthHeadline lead={t("confirmEmail.errorLead")} accent={t("confirmEmail.errorAccent")} trail={t("confirmEmail.errorTrail")} />
             <p className="text-[13px] leading-relaxed text-[var(--color-muted-foreground)]">
               {status.message}
             </p>
             <p className="mt-2 text-[12px] leading-relaxed text-[var(--color-muted-foreground)]">
-              The link may have expired or been used already. If you've signed
-              in since this email was sent, you can ignore it.
+              {t("confirmEmail.expiredHint")}
             </p>
           </div>
           <div className="flex items-center justify-center gap-2 pt-1">
             <Link to="/login">
               <Button type="button" variant="outline">
-                Back to sign in
+                {t("confirmEmail.backToSignIn")}
               </Button>
             </Link>
             <Link to="/forgot-password">
               <Button type="button" variant="ghost">
-                Reset password instead
+                {t("confirmEmail.resetPasswordInstead")}
               </Button>
             </Link>
           </div>

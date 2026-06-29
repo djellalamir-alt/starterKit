@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
   AlertCircle,
@@ -51,21 +52,19 @@ import {
   revokeSession,
   type UserSessionDto,
 } from "@/api/sessions";
-import { ApiRequestError } from "@/lib/api-client";
 import { cn } from "@/lib/cn";
+import { formatDate, localizeApiError } from "@shared/i18n";
 
 const PROFILE_KEY = ["identity", "me"] as const;
 
-const dateTimeFmt = new Intl.DateTimeFormat("en-US", {
-  month: "short",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-});
-
 function formatTimestamp(iso?: string | null) {
   if (!iso) return "—";
-  return dateTimeFmt.format(new Date(iso));
+  return formatDate(iso, {
+    month: "short",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function describeDevice(s: UserSessionDto): string {
@@ -80,19 +79,12 @@ function deviceIcon(s: UserSessionDto) {
   return isMobile ? Smartphone : MonitorSmartphone;
 }
 
-function apiErrorMessage(err: unknown, fallback: string): string {
-  if (err instanceof ApiRequestError) {
-    return err.problem?.detail ?? err.problem?.title ?? err.message;
-  }
-  if (err instanceof Error) return err.message;
-  return fallback;
-}
-
 // ─────────────────────────────────────────────────────────────────────────
 // Page
 // ─────────────────────────────────────────────────────────────────────────
 
 export function SecuritySettings() {
+  const { t } = useTranslation(["errors"]);
   const queryClient = useQueryClient();
 
   const profileQuery = useQuery({ queryKey: PROFILE_KEY, queryFn: getMyProfile });
@@ -121,8 +113,7 @@ export function SecuritySettings() {
       void queryClient.invalidateQueries({ queryKey: ["identity", "sessions", "me"] });
       toast.success("Session revoked");
     },
-    onError: (err) =>
-      toast.error(apiErrorMessage(err, "Could not revoke session.")),
+    onError: (err) => toast.error(localizeApiError(err, t)),
   });
 
   const revokeAll = useMutation({
@@ -133,8 +124,7 @@ export function SecuritySettings() {
         `Revoked ${data.revokedCount} ${data.revokedCount === 1 ? "session" : "sessions"}`,
       );
     },
-    onError: (err) =>
-      toast.error(apiErrorMessage(err, "Could not revoke sessions.")),
+    onError: (err) => toast.error(localizeApiError(err, t)),
   });
 
   const otherActiveCount = useMemo(
@@ -142,12 +132,7 @@ export function SecuritySettings() {
     [sessions],
   );
 
-  const sessionsError =
-    sessionsQuery.error instanceof ApiRequestError
-      ? sessionsQuery.error.problem?.detail ?? sessionsQuery.error.message
-      : sessionsQuery.error
-        ? "Failed to load sessions."
-        : null;
+  const sessionsError = sessionsQuery.error ? localizeApiError(sessionsQuery.error, t) : null;
 
   return (
     <div className="space-y-6 fsh-enter">
@@ -177,7 +162,7 @@ export function SecuritySettings() {
               disabled={otherActiveCount === 0 || revokeAll.isPending}
               onClick={() => revokeAll.mutate()}
             >
-              <LogOut className="mr-1.5 h-3.5 w-3.5" />
+              <LogOut className="me-1.5 h-3.5 w-3.5" />
               Sign out everywhere else
             </Button>
           </div>
@@ -247,7 +232,7 @@ export function SecuritySettings() {
                         disabled={isRevoking}
                         onClick={() => revokeOne.mutate(s.id)}
                       >
-                        <LogOut className="mr-1.5 h-3.5 w-3.5" />
+                        <LogOut className="me-1.5 h-3.5 w-3.5" />
                         {isRevoking ? "Revoking…" : "Revoke"}
                       </Button>
                     )}
@@ -323,14 +308,14 @@ function PasswordField({
           onChange={(e) => onChange(e.target.value)}
           autoFocus={autoFocus}
           required
-          className="pr-10"
+          className="pe-10"
         />
         <button
           type="button"
           tabIndex={-1}
           aria-label={show ? "Hide password" : "Show password"}
           onClick={() => setShow((s) => !s)}
-          className="absolute right-1.5 top-1/2 grid size-6 -translate-y-1/2 place-items-center rounded-md text-[var(--color-muted-foreground)] outline-none transition-colors hover:text-[var(--color-foreground)] focus-visible:ring-2 focus-visible:ring-[oklch(from_var(--color-ring)_l_c_h_/_0.5)]"
+          className="absolute end-1.5 top-1/2 grid size-6 -translate-y-1/2 place-items-center rounded-md text-[var(--color-muted-foreground)] outline-none transition-colors hover:text-[var(--color-foreground)] focus-visible:ring-2 focus-visible:ring-[oklch(from_var(--color-ring)_l_c_h_/_0.5)]"
         >
           {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
         </button>
@@ -389,6 +374,7 @@ function ChangePasswordDialog({
   open: boolean;
   onOpenChange: (next: boolean) => void;
 }) {
+  const { t } = useTranslation(["errors"]);
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -417,7 +403,7 @@ function ChangePasswordDialog({
       });
       onOpenChange(false);
     },
-    onError: (err) => setLocalError(apiErrorMessage(err, "Could not change password.")),
+    onError: (err) => setLocalError(localizeApiError(err, t)),
   });
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -521,7 +507,7 @@ function ChangePasswordDialog({
               type="submit"
               disabled={mutation.isPending || !current || !next || !confirm}
             >
-              <KeyRound className="mr-1 h-3.5 w-3.5" />
+              <KeyRound className="me-1 h-3.5 w-3.5" />
               {mutation.isPending ? "Updating…" : "Update password"}
             </Button>
           </DialogFooter>
@@ -567,6 +553,7 @@ function TwoFactorCard({ enabled, loading }: { enabled: boolean; loading: boolea
 }
 
 function TwoFactorEnroll() {
+  const { t } = useTranslation(["errors"]);
   const queryClient = useQueryClient();
   const [enrollment, setEnrollment] = useState<TwoFactorEnrollmentResponse | null>(null);
   const [code, setCode] = useState("");
@@ -578,7 +565,7 @@ function TwoFactorEnroll() {
     onSuccess: (data) => setEnrollment(data),
     onError: (err) =>
       toast.error("Enrollment failed", {
-        description: apiErrorMessage(err, "Could not start enrollment."),
+        description: localizeApiError(err, t),
       }),
   });
 
@@ -601,7 +588,7 @@ function TwoFactorEnroll() {
     },
     onError: (err) =>
       toast.error("Verification failed", {
-        description: apiErrorMessage(err, "Could not verify code."),
+        description: localizeApiError(err, t),
       }),
   });
 
@@ -651,7 +638,7 @@ function TwoFactorEnroll() {
           onClick={() => beginMutation.mutate()}
           disabled={beginMutation.isPending}
         >
-          <ShieldCheck className="mr-1.5 h-3.5 w-3.5" />
+          <ShieldCheck className="me-1.5 h-3.5 w-3.5" />
           {beginMutation.isPending ? "Generating…" : "Enable two-factor"}
         </Button>
         <span className="text-xs text-[var(--color-muted-foreground)]">
@@ -748,6 +735,7 @@ function TwoFactorEnroll() {
 }
 
 function TwoFactorDisable() {
+  const { t } = useTranslation(["errors"]);
   const queryClient = useQueryClient();
   const [password, setPassword] = useState("");
 
@@ -766,7 +754,7 @@ function TwoFactorDisable() {
     },
     onError: (err) =>
       toast.error("Disable failed", {
-        description: apiErrorMessage(err, "Could not disable two-factor."),
+        description: localizeApiError(err, t),
       }),
   });
 
@@ -791,7 +779,7 @@ function TwoFactorDisable() {
           onClick={() => mutation.mutate(password)}
           disabled={password.length === 0 || mutation.isPending}
         >
-          <ShieldOff className="mr-1 h-3.5 w-3.5" />
+          <ShieldOff className="me-1 h-3.5 w-3.5" />
           {mutation.isPending ? "Disabling…" : "Disable two-factor"}
         </Button>
       </div>

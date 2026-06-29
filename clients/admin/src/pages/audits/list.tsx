@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router-dom";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { ChevronRight, RefreshCw, ScrollText, X } from "lucide-react";
@@ -26,7 +27,7 @@ import {
   LoadingRow,
 } from "@/components/list";
 import { EmptyState } from "@/components/empty-state";
-import { ApiRequestError } from "@/lib/api-client";
+import { localizeApiError } from "@shared/i18n";
 import { AuditingPermissions } from "@/lib/permissions";
 import { AuditDetailSheet } from "@/pages/audits/detail";
 import { cn } from "@/lib/cn";
@@ -38,6 +39,7 @@ const PAGE_SIZE = 25;
 const SEARCH_DEBOUNCE_MS = 250;
 
 export function AuditsListPage() {
+  const { t } = useTranslation(["errors"]);
   const { user } = useAuth();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [params, setParams] = useSearchParams();
@@ -207,13 +209,7 @@ export function AuditsListPage() {
       </FilterBar>
 
       {query.isError && (
-        <ErrorBand
-          message={
-            query.error instanceof ApiRequestError
-              ? query.error.problem?.detail ?? query.error.message
-              : "Failed to load audit events."
-          }
-        />
+        <ErrorBand message={localizeApiError(query.error, t)} />
       )}
 
       {query.isLoading && <LoadingRow label="Loading events" />}
@@ -273,7 +269,7 @@ function AuditRow({ event, onClick }: { event: AuditSummaryDto; onClick: () => v
       <button
         type="button"
         onClick={onClick}
-        className="group grid w-full grid-cols-[auto_8rem_auto_1fr_auto] items-center gap-4 px-1 py-3 text-left transition-colors hover:bg-[var(--color-muted)]/50 focus:outline-none focus-visible:bg-[var(--color-muted)]/50"
+        className="group grid w-full grid-cols-[auto_8rem_auto_1fr_auto] items-center gap-4 px-1 py-3 text-start transition-colors hover:bg-[var(--color-muted)]/50 focus:outline-none focus-visible:bg-[var(--color-muted)]/50"
       >
         <SeverityDot severity={event.severity} />
         <span className="font-mono text-[11px] tabular-nums text-[var(--color-muted-foreground)]">

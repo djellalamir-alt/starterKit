@@ -1,0 +1,117 @@
+{
+  "app": {
+    "name": "fullstackhero",
+    "admin": "Admin",
+    "dashboard": "Dashboard",
+    "starterKit": ".NET 10 Starter Kit",
+    "versionAdmin": "v0.1 · admin",
+    "versionDashboard": "v0.1 · dashboard"
+  },
+  "actions": {
+    "cancel": "Cancel",
+    "apply": "Apply",
+    "save": "Save",
+    "close": "Close",
+    "signOut": "Sign out",
+    "search": "Search",
+    "reset": "Reset"
+  },
+  "theme": {
+    "label": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "active": "Active"
+  },
+  "language": {
+    "label": "Language",
+    "switcherLabel": "Change language",
+    "current": "Current language: {{language}}",
+    "english": "English",
+    "arabic": "العربية"
+  },
+  "account": {
+    "label": "Account",
+    "profile": "Profile",
+    "settings": "Settings",
+    "apiKeys": "API keys",
+    "unknownUser": "Unknown"
+  },
+  "status": {
+    "connectedEvents_one": "Connected · {{formattedCount}} event",
+    "connectedEvents_other": "Connected · {{formattedCount}} events",
+    "streamOffline": "Stream offline",
+    "connecting": "Connecting…",
+    "reconnecting": "Reconnecting…",
+    "idle": "Idle"
+  },
+  "dialogs": {
+    "signOutTitle": "Sign out of fullstackhero?",
+    "signOutAdminDescription": "You'll need to sign in again to access this admin. Any unsaved work in this session will be lost.",
+    "signOutDashboardDescription": "You'll need to sign in again to access this tenant. Any unsaved work in this session will be lost."
+  },
+  "navigation": {
+    "adminProduct": "Admin",
+    "dashboardProduct": "Dashboard",
+    "primary": "Primary navigation",
+    "primaryShort": "Primary",
+    "adminDescription": "Admin sections and account links.",
+    "dashboardDescription": "Site sections and account links.",
+    "openMenu": "Open navigation menu",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar",
+    "openProfileMenu": "Open profile menu",
+    "openCommandPalette": "Open command palette"
+  },
+  "settings": {
+    "profile": {
+      "loading": "Loading profile",
+      "accountFallback": "Account",
+      "profileSaved": "Profile saved",
+      "saveFailed": "Save failed",
+      "imageUpdated": "Profile image updated",
+      "loadWarning": "Couldn't load your profile. Showing details from your session; saved changes may not reflect the latest server state.",
+      "avatarTitle": "Avatar",
+      "photoTitle": "Photo",
+      "avatarDescription": "Shown in the topbar and on your activity. Square crops work best — JPG, PNG, or WebP.",
+      "identityTitle": "Identity",
+      "adminIdentityDescription": "Your account details. These are managed by an administrator — contact one if changes are needed.",
+      "dashboardIdentityDescription": "Your name and contact details, visible across the dashboard.",
+      "username": "Username",
+      "displayName": "Display name",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "phone": "Phone",
+      "addressVerified": "Address verified",
+      "notYetVerified": "Not yet verified",
+      "emailChangeHelp": "Contact your tenant admin to change your sign-in email.",
+      "reset": "Reset",
+      "saving": "Saving…",
+      "saveChanges": "Save changes",
+      "accountStatusTitle": "Account status",
+      "accountStatusDescription": "Runtime flags on this account. Contact an operator to change them.",
+      "active": "Active",
+      "disabled": "Disabled",
+      "emailConfirmed": "Email confirmed",
+      "emailPending": "Email pending",
+      "twoFactorEnabled": "2FA enabled",
+      "twoFactorOff": "2FA off",
+      "subjectIdentifierTitle": "Subject identifier",
+      "subjectIdentifierDescription": "The unique ID this account uses inside the platform. Read-only."
+    },
+    "appearance": {
+      "languageTitle": "Language",
+      "languageDescription": "Choose the language and reading direction used across this app.",
+      "themeTitle": "Theme",
+      "adminThemeDescription": "Console looks good in both modes — the editorial-terminal language is built around tone-neutral surfaces with a single chartreuse accent that reads identically on either.",
+      "dashboardThemeDescription": "Pick a colour mode for the dashboard. System follows your OS.",
+      "densityTitle": "Density",
+      "adminDensityDescription": "Compact mode will reduce card padding and row height for data-dense screens — similar to the dashboard's density toggle.",
+      "compactComingSoon": "Compact rows · coming soon",
+      "lightBlurb": "Paper-white surfaces, magazine-print mood.",
+      "darkBlurb": "Console-default. Lower glare for long sessions.",
+      "systemBlurb": "Follow the OS preference."
+    }
+  }
+}

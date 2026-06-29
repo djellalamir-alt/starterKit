@@ -130,7 +130,7 @@ function AccountRow({
       type="button"
       onClick={() => onPick(account)}
       style={{ animationDelay: `${delay}ms` }}
-      className="fsh-enter group relative flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-lg px-2 py-2.5 text-left outline-none transition-all duration-200 hover:translate-x-0.5 focus-visible:bg-[var(--color-primary)]/[0.04] active:scale-[0.99]"
+      className="fsh-enter group relative flex w-full cursor-pointer items-center gap-3 overflow-hidden rounded-lg px-2 py-2.5 text-start outline-none transition-all duration-200 hover:translate-x-0.5 focus-visible:bg-[var(--color-primary)]/[0.04] active:scale-[0.99]"
     >
       {/* Hover gradient wash */}
       <span

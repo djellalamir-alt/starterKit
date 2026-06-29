@@ -1,0 +1,9 @@
+{
+  "required": "This field is required.",
+  "email": "Enter a valid email address.",
+  "minLength": "Enter at least {{count}} characters.",
+  "maxLength": "Enter no more than {{count}} characters.",
+  "password": "Use a stronger password.",
+  "passwordConfirmation": "Passwords must match.",
+  "invalid": "Enter a valid value."
+}

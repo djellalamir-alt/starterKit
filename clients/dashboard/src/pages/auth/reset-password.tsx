@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -11,13 +12,13 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { toast } from "sonner";
+import { DirectionalIcon, localizeApiError, useDirection } from "@shared/i18n";
 import { useAuth } from "@/auth/use-auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AuthHeadline, AuthShell } from "@/components/auth/auth-shell";
 import { resetPassword } from "@/api/identity";
-import { ApiRequestError } from "@/lib/api-client";
 import { cn } from "@/lib/cn";
 
 /**
@@ -33,6 +34,21 @@ import { cn } from "@/lib/cn";
  */
 
 type Strength = "weak" | "fair" | "strong";
+
+const STRENGTH_META: Record<Strength, { fill: string; bar: string }> = {
+  weak: {
+    fill: "bg-[var(--color-destructive)]",
+    bar: "w-1/3",
+  },
+  fair: {
+    fill: "bg-[var(--color-warning)]",
+    bar: "w-2/3",
+  },
+  strong: {
+    fill: "bg-[var(--color-success)]",
+    bar: "w-full",
+  },
+};
 
 function scorePassword(value: string): Strength | null {
   if (value.length === 0) return null;
@@ -50,25 +66,9 @@ function scorePassword(value: string): Strength | null {
   return "strong";
 }
 
-const STRENGTH_META: Record<Strength, { label: string; fill: string; bar: string }> = {
-  weak: {
-    label: "Weak",
-    fill: "bg-[var(--color-destructive)]",
-    bar: "w-1/3",
-  },
-  fair: {
-    label: "Fair",
-    fill: "bg-[var(--color-warning)]",
-    bar: "w-2/3",
-  },
-  strong: {
-    label: "Strong",
-    fill: "bg-[var(--color-success)]",
-    bar: "w-full",
-  },
-};
-
 export function ResetPasswordPage() {
+  const { t } = useTranslation("auth");
+  const { isRtl } = useDirection();
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [params] = useSearchParams();
@@ -92,17 +92,13 @@ export function ResetPasswordPage() {
   const mutation = useMutation({
     mutationFn: () => resetPassword({ email, password, token, tenant }),
     onSuccess: () => {
-      toast.success("Password updated", {
-        description: "Sign in with your new password to continue.",
+      toast.success(t("resetPassword.updatedTitle"), {
+        description: t("resetPassword.updatedDescription"),
       });
       navigate("/login", { replace: true });
     },
     onError: (err: unknown) => {
-      const detail =
-        err instanceof ApiRequestError
-          ? err.problem?.detail ?? err.problem?.title ?? err.message
-          : (err as Error).message;
-      setError(detail);
+      setError(localizeApiError(err, t));
     },
   });
 
@@ -121,11 +117,11 @@ export function ResetPasswordPage() {
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!matches) {
-      setError("Passwords don't match.");
+      setError(t("resetPassword.passwordsDoNotMatch"));
       return;
     }
     if (password.length < 8) {
-      setError("Use at least 8 characters.");
+      setError(t("resetPassword.minimumLength"));
       return;
     }
     mutation.mutate();
@@ -135,12 +131,12 @@ export function ResetPasswordPage() {
     <AuthShell
       footer={
         <span>
-          Changed your mind?{" "}
+          {t("resetPassword.changedMind")}{" "}
           <Link
             to="/login"
             className="text-[var(--color-foreground)] underline-offset-4 hover:underline"
           >
-            Sign in
+            {t("resetPassword.signIn")}
           </Link>
         </span>
       }
@@ -148,25 +144,20 @@ export function ResetPasswordPage() {
       {malformed ? (
         <div className="space-y-4">
           <div className="mb-2">
-            <AuthHeadline lead="This link is" accent="incomplete" />
+            <AuthHeadline lead={t("resetPassword.malformedLead")} accent={t("resetPassword.malformedAccent")} />
             <p className="text-[13px] leading-relaxed text-[var(--color-muted-foreground)]">
-              The reset link is missing one of{" "}
-              <span className="text-[var(--color-foreground)]">token</span>,{" "}
-              <span className="text-[var(--color-foreground)]">email</span>, or{" "}
-              <span className="text-[var(--color-foreground)]">tenant</span>.
-              Some email clients clip long URLs — try copy-pasting the full
-              link from the original email into your browser's address bar.
+              {t("resetPassword.malformedDescription")}
             </p>
           </div>
           <div className="flex gap-2 pt-1">
             <Link to="/forgot-password">
               <Button type="button" variant="outline">
-                Request a new link
+                {t("resetPassword.requestNewLink")}
               </Button>
             </Link>
             <Link to="/login">
               <Button type="button" variant="ghost">
-                Back to sign in
+                {t("resetPassword.backToSignIn")}
               </Button>
             </Link>
           </div>
@@ -174,11 +165,14 @@ export function ResetPasswordPage() {
       ) : (
         <>
           <div className="mb-6 sm:mb-8">
-            <AuthHeadline lead="Set a new" accent="password" />
+            <AuthHeadline lead={t("resetPassword.titleLead")} accent={t("resetPassword.titleAccent")} />
             <p className="text-[13px] text-[var(--color-muted-foreground)]">
-              Resetting password for{" "}
-              <span className="text-[var(--color-foreground)]">{email}</span> on{" "}
-              <span className="text-[var(--color-foreground)]">{tenant}</span>.
+              <Trans
+                i18nKey="resetPassword.subtitle"
+                ns="auth"
+                values={{ email, tenant }}
+                components={{ strong: <span className="text-[var(--color-foreground)]" /> }}
+              />
             </p>
           </div>
 
@@ -188,7 +182,7 @@ export function ResetPasswordPage() {
                 htmlFor="new-password"
                 className="block text-[11.5px] font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]"
               >
-                New password
+                {t("resetPassword.newPassword")}
               </Label>
               <div className="relative">
                 <Input
@@ -196,20 +190,20 @@ export function ResetPasswordPage() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="At least 8 characters"
+                  placeholder={t("resetPassword.newPasswordPlaceholder")}
                   required
                   autoComplete="new-password"
                   autoFocus
                   minLength={8}
                   aria-invalid={error ? true : undefined}
                   aria-describedby={error ? "reset-error" : undefined}
-                  className="h-11 pr-11 text-[14px]"
+                  className="h-11 pe-11 text-[14px]"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                  className="absolute right-3.5 top-1/2 grid h-6 w-6 -translate-y-1/2 cursor-pointer place-items-center rounded text-[var(--color-muted-foreground)] transition-colors hover:text-[var(--color-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
+                  aria-label={showPassword ? t("login.hidePassword") : t("login.showPassword")}
+                  className="absolute end-3.5 top-1/2 grid h-6 w-6 -translate-y-1/2 cursor-pointer place-items-center rounded text-[var(--color-muted-foreground)] transition-colors hover:text-[var(--color-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
                 >
                   {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
@@ -226,8 +220,8 @@ export function ResetPasswordPage() {
                       )}
                     />
                   </div>
-                  <span className="min-w-[3.5rem] text-right text-[10px] font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]">
-                    {STRENGTH_META[strength].label}
+                  <span className="min-w-[3.5rem] text-end text-[10px] font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]">
+                    {t(`resetPassword.strength.${strength}`)}
                   </span>
                 </div>
               )}
@@ -238,7 +232,7 @@ export function ResetPasswordPage() {
                 htmlFor="confirm-password"
                 className="block text-[11.5px] font-semibold uppercase tracking-wider text-[var(--color-muted-foreground)]"
               >
-                Confirm password
+                {t("resetPassword.confirmPassword")}
               </Label>
               <div className="relative">
                 <Input
@@ -246,19 +240,19 @@ export function ResetPasswordPage() {
                   type={showConfirm ? "text" : "password"}
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
-                  placeholder="Re-enter password"
+                  placeholder={t("resetPassword.confirmPasswordPlaceholder")}
                   required
                   autoComplete="new-password"
                   minLength={8}
                   aria-invalid={error ? true : undefined}
                   aria-describedby={error ? "reset-error" : undefined}
-                  className="h-11 pr-11 text-[14px]"
+                  className="h-11 pe-11 text-[14px]"
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirm((v) => !v)}
-                  aria-label={showConfirm ? "Hide password" : "Show password"}
-                  className="absolute right-3.5 top-1/2 grid h-6 w-6 -translate-y-1/2 cursor-pointer place-items-center rounded text-[var(--color-muted-foreground)] transition-colors hover:text-[var(--color-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
+                  aria-label={showConfirm ? t("login.hidePassword") : t("login.showPassword")}
+                  className="absolute end-3.5 top-1/2 grid h-6 w-6 -translate-y-1/2 cursor-pointer place-items-center rounded text-[var(--color-muted-foreground)] transition-colors hover:text-[var(--color-foreground)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]"
                 >
                   {showConfirm ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
@@ -279,7 +273,7 @@ export function ResetPasswordPage() {
                       matches ? "opacity-100" : "opacity-40",
                     )}
                   />
-                  <span>{matches ? "Passwords match" : "Doesn't match yet"}</span>
+                  <span>{matches ? t("resetPassword.passwordsMatch") : t("resetPassword.passwordsNotMatchedYet")}</span>
                 </div>
               )}
             </div>
@@ -309,13 +303,19 @@ export function ResetPasswordPage() {
                 {mutation.isPending ? (
                   <>
                     <Loader2 className="size-4 animate-spin" />
-                    <span>Updating password…</span>
+                    <span>{t("resetPassword.updatingPassword")}</span>
                   </>
                 ) : (
                   <>
                     <ShieldCheck className="size-4" />
-                    <span>Set new password</span>
-                    <ArrowRight className="size-[14px] opacity-60 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100" />
+                    <span>{t("resetPassword.setNewPassword")}</span>
+                    <DirectionalIcon
+                      icon={ArrowRight}
+                      className={cn(
+                        "size-[14px] opacity-60 transition-all duration-200 group-hover:translate-x-0.5 group-hover:opacity-100",
+                        isRtl && "group-hover:-translate-x-0.5",
+                      )}
+                    />
                   </>
                 )}
               </Button>

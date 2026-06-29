@@ -10,9 +10,21 @@ test.beforeEach(async ({ page }) => {
   await installShellMocks(page);
 });
 
+async function gotoAppearance(page: Parameters<typeof test.beforeEach>[0]["page"]) {
+  await page.goto("/settings/appearance");
+  await page.addStyleTag({
+    content: `
+      *, *::before, *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    `,
+  });
+}
+
 test.describe("settings/appearance — theme + accent (client-side)", () => {
   test("renders the theme, accent, font, and density sections", async ({ page }) => {
-    await page.goto("/settings/appearance");
+    await gotoAppearance(page);
 
     // CardTitle is a styled <div>, not a heading — assert on the text.
     await expect(page.getByText("Theme", { exact: true })).toBeVisible();
@@ -27,7 +39,7 @@ test.describe("settings/appearance — theme + accent (client-side)", () => {
   });
 
   test("selecting Dark applies dark mode; Light reverts it", async ({ page }) => {
-    await page.goto("/settings/appearance");
+    await gotoAppearance(page);
     const html = page.locator("html");
 
     await page.getByRole("button", { name: "Dark theme" }).click();
@@ -47,15 +59,28 @@ test.describe("settings/appearance — theme + accent (client-side)", () => {
   });
 
   test("persists the selected mode to localStorage", async ({ page }) => {
-    await page.goto("/settings/appearance");
+    await gotoAppearance(page);
 
     await page.getByRole("button", { name: "Dark theme" }).click();
     const stored = await page.evaluate(() => window.localStorage.getItem("fsh.theme"));
     expect(stored).toBe("dark");
   });
 
+  test("switches to Arabic and persists RTL document direction", async ({ page }) => {
+    await gotoAppearance(page);
+
+    const arabic = page.getByRole("button", { name: /Arabic|العربية/ });
+    await expect(arabic).toBeVisible();
+
+    await arabic.click();
+    await expect(page.locator("html")).toHaveAttribute("lang", "ar");
+    await expect(page.locator("html")).toHaveAttribute("dir", "rtl");
+    await expect(page.getByText("اللغة").first()).toBeVisible();
+    expect(await page.evaluate(() => window.localStorage.getItem("app-language"))).toBe("ar");
+  });
+
   test("opens the custom accent dialog and applies a brand colour", async ({ page }) => {
-    await page.goto("/settings/appearance");
+    await gotoAppearance(page);
 
     await page.getByRole("button", { name: "Custom accent" }).click();
 

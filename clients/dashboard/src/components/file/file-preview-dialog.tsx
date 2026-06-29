@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { formatDate, localizeApiError } from "@shared/i18n";
 import {
   Download,
   ExternalLink,
@@ -36,7 +38,6 @@ import {
 } from "@/api/files";
 import { useAuth } from "@/auth/use-auth";
 import { useUserDisplay } from "@/lib/use-user-display";
-import { ApiRequestError } from "@/lib/api-client";
 import { formatBytes } from "@/hooks/use-file-upload";
 import { cn } from "@/lib/cn";
 
@@ -65,6 +66,7 @@ type Props = {
  * durable publicUrl shipped on the metadata DTO.
  */
 export function FilePreviewDialog({ fileAssetId, initial, onClose, onDeleted }: Props) {
+  const { t } = useTranslation(["errors"]);
   const open = fileAssetId !== null;
   const { user } = useAuth();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -82,11 +84,7 @@ export function FilePreviewDialog({ fileAssetId, initial, onClose, onDeleted }: 
       onDeleted?.(fileAssetId!);
     },
     onError: (err) => {
-      const detail =
-        err instanceof ApiRequestError
-          ? (err.problem?.detail ?? err.problem?.title ?? err.message)
-          : (err as Error).message;
-      toast.error("Delete failed", { description: detail });
+      toast.error("Delete failed", { description: localizeApiError(err, t) });
       setConfirmingDelete(false);
     },
   });
@@ -112,11 +110,7 @@ export function FilePreviewDialog({ fileAssetId, initial, onClose, onDeleted }: 
       );
     },
     onError: (err) => {
-      const detail =
-        err instanceof ApiRequestError
-          ? (err.problem?.detail ?? err.problem?.title ?? err.message)
-          : (err as Error).message;
-      toast.error("Visibility change failed", { description: detail });
+      toast.error("Visibility change failed", { description: localizeApiError(err, t) });
     },
   });
 
@@ -162,9 +156,7 @@ export function FilePreviewDialog({ fileAssetId, initial, onClose, onDeleted }: 
           {metaQuery.isError ? (
             <ErrorBand
               message={
-                metaQuery.error instanceof ApiRequestError
-                  ? (metaQuery.error.problem?.detail ?? metaQuery.error.message)
-                  : "Couldn't load file metadata."
+                localizeApiError(metaQuery.error, t)
               }
             />
           ) : !metaQuery.data ? (
@@ -405,7 +397,7 @@ function MetadataPanel({
     ["Content type", file.contentType, file.contentType],
     ["Size", formatBytes(file.sizeBytes), undefined],
     ["Status", statusLabel(file.status), undefined],
-    ["Created", new Date(file.createdAtUtc).toLocaleString(), undefined],
+    ["Created", formatDate(file.createdAtUtc, { dateStyle: "medium", timeStyle: "short" }), undefined],
   ];
 
   const isPublic = file.visibility === Visibility.Public;
@@ -470,6 +462,7 @@ function MetadataPanel({
 // private files so we don't reuse the inline URL the iframe is consuming. For public
 // files there's no inline/attachment distinction — both buttons use the same publicUrl.
 function DownloadButton({ file }: { file: FileAssetDto }) {
+  const { t } = useTranslation(["errors"]);
   const [busy, setBusy] = useState(false);
   const handle = async () => {
     if (busy) return;
@@ -482,6 +475,8 @@ function DownloadButton({ file }: { file: FileAssetDto }) {
       // Content-Disposition: attachment for private files, so the browser saves rather
       // than navigates. For public files we just open in a new tab.
       window.open(url, "_blank", "noopener,noreferrer");
+    } catch (err) {
+      toast.error("Download failed", { description: localizeApiError(err, t) });
     } finally {
       setBusy(false);
     }

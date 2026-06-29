@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Bell, CheckCheck, ExternalLink, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
@@ -19,7 +20,7 @@ import {
   Select,
 } from "@/components/list";
 import { EmptyState } from "@/components/empty-state";
-import { ApiRequestError } from "@/lib/api-client";
+import { formatDate as formatLocalizedDate, localizeApiError } from "@shared/i18n";
 import { cn } from "@/lib/cn";
 
 type Filter = "all" | "unread";
@@ -30,6 +31,7 @@ const FILTER_OPTIONS = [
 ];
 
 export function NotificationsInboxPage() {
+  const { t } = useTranslation(["errors"]);
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<Filter>("unread");
 
@@ -48,7 +50,7 @@ export function NotificationsInboxPage() {
   const markOne = useMutation({
     mutationFn: (id: string) => markNotificationRead(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notifications"] }),
-    onError: (err) => toast.error("Mark read failed", { description: describe(err) }),
+    onError: (err) => toast.error("Mark read failed", { description: localizeApiError(err, t) }),
   });
 
   const markAll = useMutation({
@@ -57,7 +59,7 @@ export function NotificationsInboxPage() {
       toast.success(`${data.updated} ${data.updated === 1 ? "notification" : "notifications"} marked read`);
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
-    onError: (err) => toast.error("Mark all failed", { description: describe(err) }),
+    onError: (err) => toast.error("Mark all failed", { description: localizeApiError(err, t) }),
   });
 
   const items = query.data ?? [];
@@ -78,7 +80,7 @@ export function NotificationsInboxPage() {
           onClick={() => query.refetch()}
           className="flex-1 sm:flex-none"
         >
-          <RefreshCw className={cn("mr-1.5 h-3.5 w-3.5", query.isFetching && "animate-spin")} />
+          <RefreshCw className={cn("me-1.5 h-3.5 w-3.5", query.isFetching && "animate-spin")} />
           Refresh
         </Button>
         <Button
@@ -88,7 +90,7 @@ export function NotificationsInboxPage() {
           disabled={markAll.isPending}
           className="flex-1 sm:flex-none"
         >
-          <CheckCheck className="mr-1.5 h-3.5 w-3.5" />
+          <CheckCheck className="me-1.5 h-3.5 w-3.5" />
           {markAll.isPending ? "Marking…" : "Mark all read"}
         </Button>
       </EntityPageHeader>
@@ -102,15 +104,7 @@ export function NotificationsInboxPage() {
         />
       </FilterBar>
 
-      {query.isError && (
-        <ErrorBand
-          message={
-            query.error instanceof ApiRequestError
-              ? query.error.problem?.detail ?? query.error.message
-              : "Failed to load notifications."
-          }
-        />
-      )}
+      {query.isError && <ErrorBand message={localizeApiError(query.error, t)} />}
 
       {query.isLoading && <LoadingRow label="Loading notifications" />}
 
@@ -168,7 +162,7 @@ function Row({
           <span className="font-medium">{notif.title}</span>
           <code className="code-chip">{notif.type}</code>
           <span className="font-mono text-[10.5px] uppercase tracking-[0.14em] text-[var(--color-muted-foreground)]">
-            {new Date(notif.createdAtUtc).toLocaleString()}
+            {formatLocalizedDate(notif.createdAtUtc, { dateStyle: "medium", timeStyle: "short" })}
           </span>
         </div>
         {notif.body && (
@@ -190,15 +184,10 @@ function Row({
       </div>
       {unread && (
         <Button variant="ghost" size="sm" onClick={onMarkRead}>
-          <CheckCheck className="mr-1 h-3.5 w-3.5" /> Mark read
+          <CheckCheck className="me-1 h-3.5 w-3.5" /> Mark read
         </Button>
       )}
     </li>
   );
 }
 
-function describe(err: unknown): string {
-  if (err instanceof ApiRequestError) return err.problem?.detail ?? err.problem?.title ?? err.message;
-  if (err instanceof Error) return err.message;
-  return String(err);
-}

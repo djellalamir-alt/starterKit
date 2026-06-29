@@ -8,24 +8,28 @@ import {
   Info,
   Loader2,
 } from "lucide-react";
+import { LanguageProvider, useDirection } from "@shared/i18n";
 import { queryClient } from "@/lib/query-client";
 import { AuthProvider } from "@/auth/auth-context";
 import { ThemeProvider, useTheme } from "@/components/theme/theme-provider";
 import { CommandPaletteProvider } from "@/components/command-palette/command-palette";
+import { getI18n } from "@/i18n";
 import { router } from "@/routes";
 
 export function App() {
   return (
-    <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <AuthProvider>
-          <CommandPaletteProvider>
-            <RouterProvider router={router} />
-            <FshToaster />
-          </CommandPaletteProvider>
-        </AuthProvider>
-      </QueryClientProvider>
-    </ThemeProvider>
+    <LanguageProvider i18n={getI18n()}>
+      <ThemeProvider>
+        <QueryClientProvider client={queryClient}>
+          <AuthProvider>
+            <CommandPaletteProvider>
+              <RouterProvider router={router} />
+              <FshToaster />
+            </CommandPaletteProvider>
+          </AuthProvider>
+        </QueryClientProvider>
+      </ThemeProvider>
+    </LanguageProvider>
   );
 }
 
@@ -41,9 +45,10 @@ export function App() {
  */
 function FshToaster() {
   const { resolved } = useTheme();
+  const { isRtl } = useDirection();
   return (
     <Toaster
-      position="top-right"
+      position={isRtl ? "top-left" : "top-right"}
       closeButton
       theme={resolved}
       gap={10}

@@ -12,6 +12,7 @@ import {
 } from "@/api/notifications";
 import { useRealtimeEvent } from "@/realtime/realtime-context";
 import { useAuth } from "@/auth/use-auth";
+import { formatDate } from "@shared/i18n";
 import { cn } from "@/lib/cn";
 
 /**
@@ -264,5 +265,5 @@ function formatRelative(value: string): string {
   if (hr < 24) return `${hr}h`;
   const day = Math.round(hr / 24);
   if (day < 14) return `${day}d`;
-  return d.toLocaleDateString();
+  return formatDate(d);
 }

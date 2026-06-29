@@ -7,8 +7,10 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 import { Menu } from "lucide-react";
+import { useDirection } from "@shared/i18n";
 import {
   Dialog as Sheet,
   SheetContent,
@@ -61,6 +63,8 @@ export function MobileNavProvider({ children }: { children: ReactNode }) {
  * Auto-closes on route changes.
  */
 export function MobileNavRoot() {
+  const { t } = useTranslation("common");
+  const { isRtl } = useDirection();
   const { open, setOpen } = useMobileNav();
   const location = useLocation();
   const { user, permissionsHydrated } = useAuth();
@@ -91,11 +95,11 @@ export function MobileNavRoot() {
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
-      <SheetContent side="left" className="flex flex-col p-0">
+      <SheetContent side={isRtl ? "right" : "left"} className="flex flex-col p-0">
         {/* Radix Dialog requires a Title for the accessible tree. */}
-        <DialogTitle className="sr-only">Primary navigation</DialogTitle>
+        <DialogTitle className="sr-only">{t("navigation.primary")}</DialogTitle>
         <DialogDescription className="sr-only">
-          Admin sections and account links.
+          {t("navigation.adminDescription")}
         </DialogDescription>
 
         {/* Brand row — matches Topbar height */}
@@ -115,7 +119,7 @@ export function MobileNavRoot() {
               fullstack<span className="text-[var(--color-primary)]">hero</span>
             </span>
             <span className="mt-0.5 text-[10px] font-semibold uppercase tracking-wider text-[oklch(from_var(--color-muted-foreground)_l_c_h_/_0.7)]">
-              Admin
+              {t("navigation.adminProduct")}
             </span>
           </div>
         </div>
@@ -130,7 +134,7 @@ export function MobileNavRoot() {
 
         <div className="border-t border-[var(--color-border)] px-5 py-3">
           <p className="font-mono text-[10.5px] uppercase tracking-[0.12em] text-[var(--color-muted-foreground)]">
-            v0.1 · admin
+            {t("app.versionAdmin")}
           </p>
         </div>
       </SheetContent>
@@ -142,12 +146,13 @@ export function MobileNavRoot() {
  * Hamburger trigger — `md:hidden`. Place in the Topbar.
  */
 export function MobileNavTrigger({ className }: { className?: string }) {
+  const { t } = useTranslation("common");
   const { setOpen } = useMobileNav();
   const onClick = useCallback(() => setOpen(true), [setOpen]);
   return (
     <button
       type="button"
-      aria-label="Open navigation menu"
+      aria-label={t("navigation.openMenu")}
       onClick={onClick}
       className={cn(
         "grid h-9 w-9 cursor-pointer place-items-center rounded-md md:hidden",

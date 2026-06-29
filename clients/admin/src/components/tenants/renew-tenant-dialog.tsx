@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { CalendarClock } from "lucide-react";
 import { toast } from "sonner";
+import { formatDate as formatLocalizedDate, localizeApiError } from "@shared/i18n";
 import { renewTenant } from "@/api/tenants";
 import { getPlans, planTermPrice } from "@/api/billing";
 import { Button } from "@/components/ui/button";
@@ -15,7 +17,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { ApiRequestError } from "@/lib/api-client";
 
 function formatMoney(amount: number, currency: string): string {
   try {
@@ -28,7 +29,7 @@ function formatMoney(amount: number, currency: string): string {
 function formatDate(value?: string | null): string {
   if (!value) return "—";
   const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString();
+  return Number.isNaN(d.getTime()) ? value : formatLocalizedDate(d);
 }
 
 /**
@@ -48,6 +49,7 @@ export function RenewTenantDialog({
   currentPlanKey?: string | null;
   validUpto?: string;
 }) {
+  const { t } = useTranslation(["errors"]);
   const queryClient = useQueryClient();
   const [planKey, setPlanKey] = useState<string>("");
 
@@ -81,11 +83,7 @@ export function RenewTenantDialog({
       onOpenChange(false);
     },
     onError: (err) => {
-      const detail =
-        err instanceof ApiRequestError
-          ? err.problem?.detail ?? err.problem?.title ?? err.message
-          : (err as Error).message;
-      toast.error("Renew failed", { description: detail });
+      toast.error("Renew failed", { description: localizeApiError(err, t) });
     },
   });
 

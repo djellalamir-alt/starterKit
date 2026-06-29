@@ -1,5 +1,6 @@
 import { forwardRef, useEffect, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -40,8 +41,8 @@ import {
   LoadingRow,
   SettingsSection,
 } from "@/components/list";
-import { ApiRequestError } from "@/lib/api-client";
 import { cn } from "@/lib/cn";
+import { localizeApiError } from "@shared/i18n";
 
 /**
  * SecuritySettings — combines password change + 2FA enrollment/disable
@@ -50,19 +51,12 @@ import { cn } from "@/lib/cn";
  * Password change is driven through a Dialog (mirrors dashboard pattern).
  */
 export function SecuritySettings() {
+  const { t } = useTranslation(["errors"]);
   const profile = useQuery({ queryKey: ["identity", "profile"], queryFn: getMyProfile });
 
   if (profile.isLoading) return <LoadingRow label="Loading security state" />;
   if (profile.isError) {
-    return (
-      <ErrorBand
-        message={
-          profile.error instanceof ApiRequestError
-            ? (profile.error.problem?.detail ?? profile.error.message)
-            : "Failed to load security state."
-        }
-      />
-    );
+    return <ErrorBand message={localizeApiError(profile.error, t)} />;
   }
 
   const twoFactorEnabled = profile.data?.twoFactorEnabled ?? false;
@@ -107,7 +101,7 @@ const RevealInput = forwardRef<HTMLInputElement, InputProps>(
         <Input
           ref={ref}
           type={show ? "text" : "password"}
-          className={cn("pr-10", className)}
+          className={cn("pe-10", className)}
           {...props}
         />
         <button
@@ -115,7 +109,7 @@ const RevealInput = forwardRef<HTMLInputElement, InputProps>(
           tabIndex={-1}
           onClick={() => setShow((s) => !s)}
           aria-label={show ? "Hide password" : "Show password"}
-          className="absolute right-1.5 top-1/2 grid size-6 -translate-y-1/2 place-items-center rounded-md text-[var(--color-muted-foreground)] outline-none transition-colors hover:text-[var(--color-foreground)] focus-visible:ring-2 focus-visible:ring-[oklch(from_var(--color-ring)_l_c_h_/_0.5)]"
+          className="absolute end-1.5 top-1/2 grid size-6 -translate-y-1/2 place-items-center rounded-md text-[var(--color-muted-foreground)] outline-none transition-colors hover:text-[var(--color-foreground)] focus-visible:ring-2 focus-visible:ring-[oklch(from_var(--color-ring)_l_c_h_/_0.5)]"
         >
           {show ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
         </button>
@@ -158,6 +152,7 @@ function ChangePasswordDialog({
   open: boolean;
   onOpenChange: (next: boolean) => void;
 }) {
+  const { t } = useTranslation(["errors"]);
   const {
     register,
     handleSubmit,
@@ -187,11 +182,7 @@ function ChangePasswordDialog({
       onOpenChange(false);
     },
     onError: (err) => {
-      const detail =
-        err instanceof ApiRequestError
-          ? (err.problem?.detail ?? err.problem?.title ?? err.message)
-          : (err as Error).message;
-      toast.error("Change failed", { description: detail });
+      toast.error("Change failed", { description: localizeApiError(err, t) });
     },
   });
 
@@ -267,7 +258,7 @@ function ChangePasswordDialog({
               Cancel
             </Button>
             <Button type="submit" disabled={submitting}>
-              <KeyRound className="mr-1 h-3.5 w-3.5" />
+              <KeyRound className="me-1 h-3.5 w-3.5" />
               {submitting ? "Updating…" : "Update password"}
             </Button>
           </DialogFooter>
@@ -285,6 +276,7 @@ function TwoFactorSection({ enabled }: { enabled: boolean }) {
 }
 
 function TwoFactorEnroll() {
+  const { t } = useTranslation(["errors"]);
   const queryClient = useQueryClient();
   const [enrollment, setEnrollment] = useState<TwoFactorEnrollmentResponse | null>(null);
   const [code, setCode] = useState("");
@@ -295,11 +287,7 @@ function TwoFactorEnroll() {
     mutationFn: enrollTwoFactor,
     onSuccess: (data) => setEnrollment(data),
     onError: (err: unknown) => {
-      const detail =
-        err instanceof ApiRequestError
-          ? (err.problem?.detail ?? err.problem?.title ?? err.message)
-          : (err as Error).message;
-      toast.error("Enrollment failed", { description: detail });
+      toast.error("Enrollment failed", { description: localizeApiError(err, t) });
     },
   });
 
@@ -319,11 +307,7 @@ function TwoFactorEnroll() {
       }
     },
     onError: (err: unknown) => {
-      const detail =
-        err instanceof ApiRequestError
-          ? (err.problem?.detail ?? err.problem?.title ?? err.message)
-          : (err as Error).message;
-      toast.error("Verification failed", { description: detail });
+      toast.error("Verification failed", { description: localizeApiError(err, t) });
     },
   });
 
@@ -392,7 +376,7 @@ function TwoFactorEnroll() {
             onClick={() => beginMutation.mutate()}
             disabled={beginMutation.isPending}
           >
-            <ShieldCheck className="mr-1.5 h-3.5 w-3.5" />
+            <ShieldCheck className="me-1.5 h-3.5 w-3.5" />
             {beginMutation.isPending ? "Generating…" : "Enable two-factor"}
           </Button>
           <span className="text-xs text-[var(--color-muted-foreground)]">
@@ -490,6 +474,7 @@ function TwoFactorEnroll() {
 }
 
 function TwoFactorDisable() {
+  const { t } = useTranslation(["errors"]);
   const queryClient = useQueryClient();
   const [password, setPassword] = useState("");
 
@@ -505,11 +490,7 @@ function TwoFactorDisable() {
       }
     },
     onError: (err: unknown) => {
-      const detail =
-        err instanceof ApiRequestError
-          ? (err.problem?.detail ?? err.problem?.title ?? err.message)
-          : (err as Error).message;
-      toast.error("Disable failed", { description: detail });
+      toast.error("Disable failed", { description: localizeApiError(err, t) });
     },
   });
 
@@ -534,7 +515,7 @@ function TwoFactorDisable() {
             onClick={() => mutation.mutate(password)}
             disabled={password.length === 0 || mutation.isPending}
           >
-            <ShieldOff className="mr-1 h-3.5 w-3.5" />
+            <ShieldOff className="me-1 h-3.5 w-3.5" />
             {mutation.isPending ? "Disabling…" : "Disable two-factor"}
           </Button>
         </div>
@@ -562,7 +543,7 @@ function TwoFactorDisable() {
             onClick={() => mutation.mutate(password)}
             disabled={password.length === 0 || mutation.isPending}
           >
-            <ShieldOff className="mr-1 h-3.5 w-3.5" />
+            <ShieldOff className="me-1 h-3.5 w-3.5" />
             {mutation.isPending ? "Disabling…" : "Disable"}
           </Button>
         </div>
@@ -575,9 +556,7 @@ function TwoFactorDisable() {
         >
           <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
           <span>
-            {mutation.error instanceof ApiRequestError
-              ? (mutation.error.problem?.detail ?? mutation.error.message)
-              : (mutation.error as Error).message}
+            {localizeApiError(mutation.error, t)}
           </span>
         </div>
       )}

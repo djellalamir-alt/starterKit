@@ -3,6 +3,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useTranslation } from "react-i18next";
 import { Plus, Webhook, X } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -21,7 +22,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Field } from "@/components/list";
-import { ApiRequestError } from "@/lib/api-client";
+import { localizeApiError } from "@shared/i18n";
 import { cn } from "@/lib/cn";
 
 const schema = z.object({
@@ -52,6 +53,8 @@ export function CreateWebhookDialog({
 }) {
   const [events, setEvents] = useState<string[]>([]);
   const [draftEvent, setDraftEvent] = useState("");
+
+  const { t } = useTranslation(["errors"]);
 
   const {
     register,
@@ -85,11 +88,7 @@ export function CreateWebhookDialog({
       onOpenChange(false);
     },
     onError: (err) => {
-      const detail =
-        err instanceof ApiRequestError
-          ? err.problem?.detail ?? err.problem?.title ?? err.message
-          : (err as Error).message;
-      toast.error("Create failed", { description: detail });
+      toast.error("Create failed", { description: localizeApiError(err, t) });
     },
   });
 

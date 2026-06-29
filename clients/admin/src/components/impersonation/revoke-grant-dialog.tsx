@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { ShieldOff } from "lucide-react";
 import { toast } from "sonner";
+import { formatDate, localizeApiError } from "@shared/i18n";
 import {
   revokeImpersonationGrant,
   type ImpersonationGrantDto,
@@ -17,7 +19,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { ApiRequestError } from "@/lib/api-client";
 import { cn } from "@/lib/cn";
 
 type Props = {
@@ -34,6 +35,7 @@ type Props = {
  * operator knows exactly what they're killing.
  */
 export function RevokeGrantDialog({ grant, onOpenChange, onRevoked }: Props) {
+  const { t } = useTranslation(["errors"]);
   const queryClient = useQueryClient();
   const [reason, setReason] = useState("");
   const open = grant !== null;
@@ -54,11 +56,7 @@ export function RevokeGrantDialog({ grant, onOpenChange, onRevoked }: Props) {
       onOpenChange(false);
     },
     onError: (err) => {
-      const detail =
-        err instanceof ApiRequestError
-          ? err.problem?.detail ?? err.problem?.title ?? err.message
-          : err.message;
-      toast.error("Revoke failed", { description: detail });
+      toast.error("Revoke failed", { description: localizeApiError(err, t) });
     },
   });
 
@@ -120,7 +118,7 @@ export function RevokeGrantDialog({ grant, onOpenChange, onRevoked }: Props) {
             onClick={() => mutation.mutate()}
             disabled={mutation.isPending}
           >
-            <ShieldOff className="mr-1 h-3.5 w-3.5" />
+            <ShieldOff className="me-1 h-3.5 w-3.5" />
             {mutation.isPending ? "Revoking…" : "Revoke now"}
           </Button>
         </DialogFooter>
@@ -136,13 +134,13 @@ function GrantSummary({ grant }: { grant: ImpersonationGrantDto }) {
         <span className="font-medium">
           {grant.impersonatedUserName ?? grant.impersonatedUserId}
         </span>{" "}
-        <Badge variant="muted" className="ml-1 font-mono uppercase tracking-[0.14em]">
+        <Badge variant="muted" className="ms-1 font-mono uppercase tracking-[0.14em]">
           {grant.impersonatedTenantId}
         </Badge>
       </Row>
       <Row label="Started by">
         <span>{grant.actorUserName ?? grant.actorUserId}</span>{" "}
-        <Badge variant="muted" className="ml-1 font-mono uppercase tracking-[0.14em]">
+        <Badge variant="muted" className="ms-1 font-mono uppercase tracking-[0.14em]">
           {grant.actorTenantId}
         </Badge>
       </Row>
@@ -150,7 +148,9 @@ function GrantSummary({ grant }: { grant: ImpersonationGrantDto }) {
         <span className="text-[var(--color-muted-foreground)]">{grant.reason || "—"}</span>
       </Row>
       <Row label="Expires">
-        <code className="code-chip">{new Date(grant.expiresAtUtc).toLocaleString()}</code>
+        <code className="code-chip">
+          {formatDate(grant.expiresAtUtc, { dateStyle: "medium", timeStyle: "short" })}
+        </code>
       </Row>
     </div>
   );

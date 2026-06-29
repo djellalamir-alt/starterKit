@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { RealtimeStatusPill } from "@/components/realtime/realtime-status-pill";
 import { cn } from "@/lib/cn";
+import { formatDate } from "@shared/i18n";
 
 /**
  * Bell icon + dropdown inbox. Calm header + scrollable list with a
@@ -203,7 +204,7 @@ function NotificationRow({
       type="button"
       onClick={onSelect}
       className={cn(
-        "group/notif flex w-full cursor-pointer items-start gap-2.5 rounded-lg p-2.5 text-left",
+                "group/notif flex w-full cursor-pointer items-start gap-2.5 rounded-lg p-2.5 text-start",
         "transition-colors duration-[var(--duration-fast)] ease-[var(--ease-out-cubic)]",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-ring)]",
         isUnread
@@ -267,5 +268,5 @@ function relativeTime(iso: string): string {
   if (days < 7) return `${days}d`;
   const weeks = Math.round(days / 7);
   if (weeks < 5) return `${weeks}w`;
-  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return formatDate(iso, { month: "short", day: "numeric" });
 }

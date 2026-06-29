@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Activity, Inbox } from "lucide-react";
+import { formatDate, formatNumber } from "@shared/i18n";
 import { useSseEvents, useSseStatus, type SseEvent } from "@/sse/sse-context";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,15 +13,15 @@ import {
   type EntityStatusTone,
 } from "@/components/list";
 
-const timeFmt = new Intl.DateTimeFormat("en-US", {
+const timeFmt: Intl.DateTimeFormatOptions = {
   hour: "2-digit",
   minute: "2-digit",
   second: "2-digit",
   hour12: false,
-});
+};
 
 function formatTime(ts: number) {
-  return timeFmt.format(new Date(ts));
+  return formatDate(ts, timeFmt);
 }
 
 function payloadSummary(data: unknown, raw: string): string {
@@ -107,7 +108,7 @@ export function ActivityPage() {
             <p className="text-[12px] font-medium text-[var(--color-muted-foreground)]">
               {items.length} event{items.length === 1 ? "" : "s"} shown
               <span className="ml-2 opacity-60">
-                · {new Intl.NumberFormat("en-US").format(eventCount)} total
+                · {formatNumber(eventCount)} total
               </span>
             </p>
           </div>

@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useQuery } from "@tanstack/react-query";
 import { ChevronDown, Clock, RefreshCw, ShieldOff, UserCog } from "lucide-react";
 import {
@@ -23,7 +24,7 @@ import { EmptyState } from "@/components/empty-state";
 import { ImpersonateDialog } from "@/components/impersonation/impersonate-dialog";
 import { RevokeGrantDialog } from "@/components/impersonation/revoke-grant-dialog";
 import { IdentityPermissions } from "@/lib/permissions";
-import { ApiRequestError } from "@/lib/api-client";
+import { formatDate as formatLocalizedDate, localizeApiError } from "@shared/i18n";
 import { cn } from "@/lib/cn";
 
 const REFRESH_INTERVAL_MS = 5_000;
@@ -36,6 +37,7 @@ const STATUS_OPTIONS: { value: ImpersonationGrantStatus; label: string }[] = [
 ];
 
 export function ImpersonationListPage() {
+  const { t } = useTranslation(["errors"]);
   const { user } = useAuth();
   const canRevoke = (user?.permissions ?? []).includes(IdentityPermissions.Impersonation.Revoke);
   const canImpersonate = (user?.permissions ?? []).includes(IdentityPermissions.Users.Impersonate);
@@ -87,7 +89,7 @@ export function ImpersonationListPage() {
           onClick={() => grants.refetch()}
           className="flex-1 sm:flex-none"
         >
-          <RefreshCw className={cn("mr-1.5 h-3.5 w-3.5", grants.isFetching && "animate-spin")} />
+          <RefreshCw className={cn("me-1.5 h-3.5 w-3.5", grants.isFetching && "animate-spin")} />
           Refresh
         </Button>
       </EntityPageHeader>
@@ -109,15 +111,7 @@ export function ImpersonationListPage() {
         />
       </FilterBar>
 
-      {grants.isError && (
-        <ErrorBand
-          message={
-            grants.error instanceof ApiRequestError
-              ? grants.error.problem?.detail ?? grants.error.message
-              : "Failed to load impersonation grants."
-          }
-        />
-      )}
+      {grants.isError && <ErrorBand message={localizeApiError(grants.error, t)} />}
 
       {grants.isLoading && <LoadingRow label="Loading grants" />}
 
@@ -251,7 +245,7 @@ function GrantRow({
           </div>
           <div className="mt-0.5 flex flex-wrap items-baseline gap-x-3 gap-y-0.5 font-mono text-[10.5px] text-[var(--color-muted-foreground)]">
             <span>
-              <Clock className="-mt-0.5 mr-1 inline h-3 w-3" aria-hidden />
+              <Clock className="-mt-0.5 me-1 inline h-3 w-3" aria-hidden />
               {formatTimestamp(grant.startedAtUtc)}
             </span>
             <span>· expires {formatTimestamp(grant.expiresAtUtc)}</span>
@@ -260,7 +254,7 @@ function GrantRow({
               onClick={() => setOpen((v) => !v)}
               aria-expanded={open}
               aria-label={open ? "Hide grant details" : "Show grant details"}
-              className="ml-1 inline-flex items-center gap-0.5 underline-offset-2 hover:text-[var(--color-foreground)] hover:underline"
+              className="ms-1 inline-flex items-center gap-0.5 underline-offset-2 hover:text-[var(--color-foreground)] hover:underline"
             >
               {open ? "hide" : "details"}
               <ChevronDown className={cn("h-3 w-3 transition-transform", open && "rotate-180")} />
@@ -276,12 +270,12 @@ function GrantRow({
               onClick={onReopen}
               title="Issue a fresh impersonation token for this user — use when you've lost the original browser tab."
             >
-              <UserCog className="mr-1 h-3.5 w-3.5" /> Re-open
+              <UserCog className="me-1 h-3.5 w-3.5" /> Re-open
             </Button>
           )}
           {canRevoke ? (
             <Button variant="outline" size="sm" onClick={onRevoke}>
-              <ShieldOff className="mr-1 h-3.5 w-3.5" /> Revoke
+              <ShieldOff className="me-1 h-3.5 w-3.5" /> Revoke
             </Button>
           ) : (
             !canReopen && <span aria-hidden />
@@ -295,7 +289,7 @@ function GrantRow({
 
 function Details({ grant }: { grant: ImpersonationGrantDto }) {
   return (
-    <dl className="ml-7 grid grid-cols-1 gap-y-1 border-l-2 border-[var(--color-accent-signal)] py-2 pl-4 text-[12px] sm:grid-cols-2 sm:gap-x-6">
+    <dl className="ms-7 grid grid-cols-1 gap-y-1 border-s-2 border-[var(--color-accent-signal)] py-2 ps-4 text-[12px] sm:grid-cols-2 sm:gap-x-6">
       <DRow label="Reason">
         <span className="text-[var(--color-muted-foreground)]">{grant.reason || "—"}</span>
       </DRow>
@@ -304,11 +298,11 @@ function Details({ grant }: { grant: ImpersonationGrantDto }) {
       <DRow label="Actor"><code className="code-chip">{grant.actorUserId}</code> @ {grant.actorTenantId}</DRow>
       <DRow label="Impersonated"><code className="code-chip">{grant.impersonatedUserId}</code></DRow>
       {grant.endedAtUtc && (
-        <DRow label="Ended at">{new Date(grant.endedAtUtc).toLocaleString()}</DRow>
+        <DRow label="Ended at">{formatLocalizedDate(grant.endedAtUtc, { dateStyle: "medium", timeStyle: "short" })}</DRow>
       )}
       {grant.revokedAtUtc && (
         <>
-          <DRow label="Revoked at">{new Date(grant.revokedAtUtc).toLocaleString()}</DRow>
+          <DRow label="Revoked at">{formatLocalizedDate(grant.revokedAtUtc, { dateStyle: "medium", timeStyle: "short" })}</DRow>
           <DRow label="Revoked by">{grant.revokedByUserName ?? grant.revokedByUserId ?? "—"}</DRow>
           <DRow label="Revoke reason" wide>
             <span className="text-[var(--color-muted-foreground)]">{grant.revokeReason || "—"}</span>

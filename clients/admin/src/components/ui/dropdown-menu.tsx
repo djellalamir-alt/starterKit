@@ -75,7 +75,7 @@ export const DropdownMenuLinkItem = React.forwardRef<
     <DropdownMenuItem ref={ref} asChild {...props}>
       <a href={href} className="w-full">
         {children}
-        <ChevronRight className="ml-auto h-3.5 w-3.5 text-[var(--color-muted-foreground)]" aria-hidden />
+        <ChevronRight className="ms-auto h-3.5 w-3.5 text-[var(--color-muted-foreground)] rtl:scale-x-[-1]" aria-hidden />
       </a>
     </DropdownMenuItem>
   );

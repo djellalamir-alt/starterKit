@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
   Building2,
@@ -44,10 +45,12 @@ import {
   LoadingRow,
   SettingsSection,
 } from "@/components/list";
+import { formatDate, localizeApiError } from "@shared/i18n";
 import { ApiRequestError } from "@/lib/api-client";
 import { cn } from "@/lib/cn";
 
 export function TenantDetailPage() {
+  const { t } = useTranslation(["errors"]);
   const { id = "" } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -99,7 +102,7 @@ export function TenantDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["tenant", id] });
       queryClient.invalidateQueries({ queryKey: ["tenants"] });
     },
-    onError: (err) => toast.error("Activation change failed", { description: describe(err) }),
+    onError: (err) => toast.error("Activation change failed", { description: localizeApiError(err, t) }),
   });
 
   const retryMutation = useMutation({
@@ -108,7 +111,7 @@ export function TenantDetailPage() {
       toast.success("Provisioning re-queued");
       queryClient.invalidateQueries({ queryKey: ["tenant", id, "provisioning"] });
     },
-    onError: (err) => toast.error("Retry failed", { description: describe(err) }),
+    onError: (err) => toast.error("Retry failed", { description: localizeApiError(err, t) }),
   });
 
   const tenant = tenantQuery.data;
@@ -131,7 +134,7 @@ export function TenantDetailPage() {
       </EntityPageHeader>
 
       {tenantQuery.isError && (
-        <ErrorBand message={describe(tenantQuery.error)} />
+        <ErrorBand message={localizeApiError(tenantQuery.error, t)} />
       )}
 
       {tenantQuery.isLoading && !tenant && <LoadingRow label="Loading tenant" />}
@@ -175,7 +178,7 @@ export function TenantDetailPage() {
                     )}
                     <Badge variant="outline">
                       <CalendarClock className="h-3 w-3" />
-                      Valid until {formatDate(tenant.validUpto)}
+                      Valid until {tenant.validUpto ? formatDate(tenant.validUpto) : "—"}
                     </Badge>
                     {tenant.issuer && (
                       <Badge variant="outline" className="font-mono text-[10.5px]">
@@ -310,7 +313,7 @@ export function TenantDetailPage() {
               <InfoRow label="Valid until">
                 <span className="flex items-center gap-1.5">
                   <CalendarClock className="h-3.5 w-3.5 text-[var(--color-muted-foreground)]" />
-                  {formatDate(tenant.validUpto)}
+                  {tenant.validUpto ? formatDate(tenant.validUpto) : "—"}
                   {tenant.expiryState && tenant.expiryState !== "Active" && (
                     <Badge variant={expiryVariant(tenant.expiryState)}>
                       {tenant.expiryState === "InGrace" ? "In grace" : "Expired"}
@@ -385,7 +388,7 @@ function InfoRow({
       </span>
       <span
         className={cn(
-          "min-w-0 truncate text-right text-[13px] text-[var(--color-foreground)]",
+          "min-w-0 truncate text-end text-[13px] text-[var(--color-foreground)]",
           mono && "font-mono text-[12px]",
         )}
       >
@@ -426,6 +429,7 @@ function ProvisioningPanel({
   retryPending: boolean;
   canRetry?: boolean;
 }) {
+  const { t } = useTranslation(["errors"]);
   const overall = notTracked ? "Not tracked" : status ?? (loading ? "Loading" : "Unknown");
 
   const overallVariant =
@@ -461,7 +465,7 @@ function ProvisioningPanel({
 
       {/* Body */}
       {error ? (
-        <ErrorBand message={describe(error)} />
+        <ErrorBand message={localizeApiError(error, t)} />
       ) : loading && steps.length === 0 ? (
         <p className="text-[13px] text-[var(--color-muted-foreground)]">Loading…</p>
       ) : notTracked ? (
@@ -659,12 +663,6 @@ function StepRow({
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
-function formatDate(value: string | undefined): string {
-  if (!value) return "—";
-  const d = new Date(value);
-  return Number.isNaN(d.getTime()) ? value : d.toLocaleDateString();
-}
-
 function expiryVariant(state: string): React.ComponentProps<typeof Badge>["variant"] {
   return state === "Expired" ? "danger" : state === "InGrace" ? "warning" : "outline";
 }
@@ -682,8 +680,4 @@ function formatDuration(start: string, end: string): string {
   return `${m}m ${rem}s`;
 }
 
-function describe(err: unknown): string {
-  if (err instanceof ApiRequestError) return err.problem?.detail ?? err.problem?.title ?? err.message;
-  if (err instanceof Error) return err.message;
-  return String(err);
-}
+

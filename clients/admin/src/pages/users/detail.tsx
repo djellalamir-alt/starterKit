@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, Check, Mail, ShieldCheck, User as UserIcon, Users } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import {
   assignUserRoles,
   getUser,
@@ -20,10 +21,11 @@ import {
   LoadingRow,
   SettingsSection,
 } from "@/components/list";
-import { ApiRequestError } from "@/lib/api-client";
+import { localizeApiError } from "@shared/i18n";
 import { cn } from "@/lib/cn";
 
 export function UserDetailPage() {
+  const { t } = useTranslation(["errors"]);
   const { id = "" } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -47,7 +49,7 @@ export function UserDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["user", id] });
       queryClient.invalidateQueries({ queryKey: ["users"] });
     },
-    onError: (err) => toast.error("Status change failed", { description: describeErr(err) }),
+    onError: (err) => toast.error("Status change failed", { description: localizeApiError(err, t) }),
   });
 
   const user = userQuery.data;
@@ -76,7 +78,7 @@ export function UserDetailPage() {
         </Button>
       </EntityPageHeader>
 
-      {userQuery.isError && <ErrorBand message={describeErr(userQuery.error)} />}
+      {userQuery.isError && <ErrorBand message={localizeApiError(userQuery.error, t)} />}
 
       {userQuery.isLoading && !user && <LoadingRow label="Loading account" />}
 
@@ -205,7 +207,7 @@ function DetailRow({
       </dt>
       <dd
         className={cn(
-          "min-w-0 truncate text-right text-[13px] text-[var(--color-foreground)]",
+          "min-w-0 truncate text-end text-[13px] text-[var(--color-foreground)]",
           mono && "font-mono text-[11.5px]",
         )}
       >
@@ -228,6 +230,7 @@ function RolesEditor({
   error: unknown;
   onSaved: () => void;
 }) {
+  const { t } = useTranslation(["errors"]);
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState<Record<string, boolean>>({});
 
@@ -255,7 +258,7 @@ function RolesEditor({
       queryClient.invalidateQueries({ queryKey: ["user", userId, "roles"] });
       onSaved();
     },
-    onError: (err) => toast.error("Role update failed", { description: describeErr(err) }),
+    onError: (err) => toast.error("Role update failed", { description: localizeApiError(err, t) }),
   });
 
   const onSave = () => {
@@ -297,7 +300,7 @@ function RolesEditor({
       }
     >
       {error ? (
-        <ErrorBand message={describeErr(error)} />
+        <ErrorBand message={localizeApiError(error, t)} />
       ) : loading ? (
         <p className="text-sm text-[var(--color-muted-foreground)]">
           Loading
@@ -396,11 +399,4 @@ function RoleChip({
   );
 }
 
-// ─── helpers ────────────────────────────────────────────────────────────
 
-function describeErr(err: unknown): string {
-  if (err instanceof ApiRequestError)
-    return err.problem?.detail ?? err.problem?.title ?? err.message;
-  if (err instanceof Error) return err.message;
-  return String(err);
-}
