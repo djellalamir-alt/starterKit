@@ -100,7 +100,9 @@ test.describe("login — manual sign in", () => {
     await page.getByLabel("Password", { exact: true }).fill("wrongpw");
     await page.getByRole("button", { name: /^sign in$/i }).click();
 
-    await expect(page.getByRole("alert")).toContainText(/invalid credentials/i);
+    await expect(page.getByRole("alert")).toContainText(
+      /Your session has expired\. Sign in again\./i,
+    );
     await expect(page.getByRole("heading", { name: /welcome back/i })).toBeVisible();
   });
 });

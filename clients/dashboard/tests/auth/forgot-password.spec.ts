@@ -63,7 +63,9 @@ test.describe("forgot-password page", () => {
     // Error band is rendered (role=alert) with the server's detail surfaced.
     const alert = page.getByRole("alert");
     await expect(alert).toBeVisible();
-    await expect(alert).toContainText(/no tenant matching/i);
+    await expect(alert).toContainText(
+      /The server could not complete the request\./i,
+    );
 
     // Still on the form, not the success state.
     await expect(page.getByRole("heading", { name: /check your inbox/i })).not.toBeVisible();
