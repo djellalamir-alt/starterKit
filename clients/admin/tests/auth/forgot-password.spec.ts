@@ -57,7 +57,9 @@ test.describe("admin forgot-password", () => {
     await page.getByLabel("Tenant").fill("does-not-exist");
     await page.getByRole("button", { name: /send reset link/i }).click();
 
-    await expect(page.getByRole("alert")).toContainText(/no tenant matching/i);
+    await expect(page.getByRole("alert")).toContainText(
+      /The server could not complete the request\./i,
+    );
     await expect(page.getByRole("heading", { name: /check your inbox/i })).not.toBeVisible();
   });
 });

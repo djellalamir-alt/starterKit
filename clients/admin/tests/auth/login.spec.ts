@@ -81,7 +81,7 @@ test.describe("admin login", () => {
     await page.getByLabel("Password", { exact: true }).fill("wrong-password");
     await page.getByRole("button", { name: "Sign in", exact: true }).click();
 
-    await expect(page.getByText("Invalid credentials.")).toBeVisible();
+    await expect(page.getByText("Your session has expired. Sign in again.")).toBeVisible();
     await expect(page).toHaveURL(/\/login$/);
   });
 

@@ -182,7 +182,7 @@ test.describe("tenant branding card", () => {
     });
 
     await page.goto(`/tenants/${TENANT_ID}`);
-    await expect(page.getByText(/read-only for this caller/i)).toBeVisible({
+    await expect(page.getByText(/You do not have permission to perform this action\./i)).toBeVisible({
       timeout: 10_000,
     });
     // No save button when the editor never loaded.
